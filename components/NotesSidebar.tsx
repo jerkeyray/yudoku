@@ -31,10 +31,10 @@ interface NotesSidebarProps {
   className?: string;
 }
 
-const NOTE_MAX_EFFECTIVE_CHARS = 80;
-// Make new lines consume a lot of the budget so users can't add tons of empty lines.
-// With +19, each "\n" counts as 20 total (1 + 19).
-const NOTE_NEWLINE_EXTRA_CHARS = 19;
+const NOTE_MAX_EFFECTIVE_CHARS = 280;
+// Make new lines consume some of the budget so users can't add tons of empty lines.
+// With +9, each "\n" counts as 10 total (1 + 9).
+const NOTE_NEWLINE_EXTRA_CHARS = 9;
 
 function effectiveNoteLength(text: string) {
   const newlines = (text.match(/\n/g) || []).length;
@@ -398,7 +398,7 @@ export function NotesSidebar({
                 truncateToEffectiveLimit(next, NOTE_MAX_EFFECTIVE_CHARS)
               );
             }}
-            rows={2}
+            rows={3}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();

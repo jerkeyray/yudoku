@@ -4,10 +4,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const MOMENT_MAX_EFFECTIVE_CHARS = 80;
-// Make new lines consume a lot of the budget so users can't add tons of empty lines.
-// With +19, each "\n" counts as 20 total (1 + 19).
-const MOMENT_NEWLINE_EXTRA_CHARS = 19;
+const MOMENT_MAX_EFFECTIVE_CHARS = 280;
+// Make new lines consume some of the budget so users can't add tons of empty lines.
+// With +9, each "\n" counts as 10 total (1 + 9).
+const MOMENT_NEWLINE_EXTRA_CHARS = 9;
 
 function normalizeMomentContent(input: string) {
   const normalized = input.replace(/\r\n?/g, "\n");
