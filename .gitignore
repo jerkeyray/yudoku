@@ -21,7 +21,6 @@
 /build
 
 # misc
-.DS_Store
 *.pem
 
 # debug
@@ -42,3 +41,46 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# AI tools
+.claude/plans/
+.claude/todos/
+.claude/memory/
+.cursor/
+.windsurf/
+.aider*
+.codeium/
+.copilot/
+.augment/
+.tabnine/
+.sourcegraph/
+.cody/
+.devin/
+.replit/
+.bolt/
+.v0/
+
+# editors / IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Sentry
+.sentryclirc
+
+# Turbo
+.turbo/
+
+# Docker
+docker-compose.override.yml
