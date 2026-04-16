@@ -154,6 +154,7 @@ model ChapterProgress {
 
   @@unique([userId, chapterId])
   @@index([chapterId])
+  @@index([userId, completed])
 }
 
 // VideoProgress model (track completion)
@@ -169,6 +170,7 @@ model VideoProgress {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, videoId])
+  @@index([userId, completed])
 }
 
 // Bookmark model (bookmarked videos)
@@ -223,6 +225,7 @@ model UserActivity {
   updatedAt DateTime @updatedAt
 
   @@unique([userId, date])
+  @@index([userId])
 }
 
 // Note model (timestamped notes)

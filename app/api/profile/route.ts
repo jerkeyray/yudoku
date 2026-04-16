@@ -240,6 +240,8 @@ export async function GET() {
         createdAt: a.createdAt.toISOString(),
         updatedAt: a.updatedAt.toISOString(),
       })),
+    }, {
+      headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300" },
     });
   } catch (error) {
     console.error("Error fetching profile data:", error);

@@ -51,49 +51,49 @@ export async function GET() {
 
     const courseIds = courses.map((c) => c.id);
 
-    const videos = await db.video.findMany({
-      where: { courseId: { in: courseIds } },
-      select: { id: true, courseId: true, order: true },
-      orderBy: [{ courseId: "asc" }, { order: "asc" }],
-    });
-
-    const chapters = await db.chapter.findMany({
-      where: { video: { courseId: { in: courseIds } } },
-      select: {
-        id: true,
-        order: true,
-        video: { select: { courseId: true } },
-      },
-      orderBy: [{ videoId: "asc" }, { order: "asc" }],
-    });
-
-    const completedProgress = await db.videoProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        video: { courseId: { in: courseIds } },
-      },
-      select: {
-        video: { select: { id: true, courseId: true, order: true } },
-      },
-    });
-
-    const completedChapterProgress = await db.chapterProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        chapter: { video: { courseId: { in: courseIds } } },
-      },
-      select: {
-        chapter: {
+    const [videos, chapters, completedProgress, completedChapterProgress] =
+      await Promise.all([
+        db.video.findMany({
+          where: { courseId: { in: courseIds } },
+          select: { id: true, courseId: true, order: true },
+          orderBy: [{ courseId: "asc" }, { order: "asc" }],
+        }),
+        db.chapter.findMany({
+          where: { video: { courseId: { in: courseIds } } },
           select: {
             id: true,
             order: true,
             video: { select: { courseId: true } },
           },
-        },
-      },
-    });
+          orderBy: [{ videoId: "asc" }, { order: "asc" }],
+        }),
+        db.videoProgress.findMany({
+          where: {
+            userId,
+            completed: true,
+            video: { courseId: { in: courseIds } },
+          },
+          select: {
+            video: { select: { id: true, courseId: true, order: true } },
+          },
+        }),
+        db.chapterProgress.findMany({
+          where: {
+            userId,
+            completed: true,
+            chapter: { video: { courseId: { in: courseIds } } },
+          },
+          select: {
+            chapter: {
+              select: {
+                id: true,
+                order: true,
+                video: { select: { courseId: true } },
+              },
+            },
+          },
+        }),
+      ]);
 
     const videosByCourse = new Map<
       string,
@@ -210,7 +210,10 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ courses: summaries });
+    return NextResponse.json(
+      { courses: summaries },
+      { headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300" } }
+    );
   } catch (error) {
     // console.error("Error fetching courses:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

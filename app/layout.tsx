@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     siteName: "Yudoku",
     images: [
       {
-        url: `${siteUrl}/og.png`,
+        url: `${siteUrl}/og.jpg`,
         width: 1200,
         height: 630,
         alt: "Yudoku platform thumbnail",
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Yudoku",
     description: "The Youtube Course Experience Platform",
-    images: [`${siteUrl}/og.png`],
+    images: [`${siteUrl}/og.jpg`],
   },
 };
 

@@ -22,9 +22,13 @@ import {
   List,
 } from "lucide-react";
 import { toast } from "sonner";
+import dynamic from "next/dynamic";
 import VideoPlayer from "./VideoPlayer";
-import { NotesSidebar } from "@/components/NotesSidebar";
-import ChaptersSheet from "./ChaptersSheet";
+
+const NotesSidebar = dynamic(
+  () => import("@/components/NotesSidebar").then((mod) => ({ default: mod.NotesSidebar })),
+);
+const ChaptersSheet = dynamic(() => import("./ChaptersSheet"));
 
 type CourseWithProgress = Course & {
   videos: (Video & {

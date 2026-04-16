@@ -53,7 +53,9 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(activities);
+    return NextResponse.json(activities, {
+      headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300" },
+    });
   } catch (error) {
     // console.error("Error in GET /api/activity:", error);
     return NextResponse.json(

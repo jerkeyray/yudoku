@@ -217,7 +217,6 @@ export function DashboardSidebar({
                       fill
                       className="object-cover"
                       sizes="32px"
-                      unoptimized
                     />
                   </div>
                 ) : (

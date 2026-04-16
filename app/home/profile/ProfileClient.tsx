@@ -126,7 +126,6 @@ export default function ProfileClient({
                     sizes="128px"
                     quality={85}
                     priority
-                    unoptimized
                   />
                 </div>
               ) : (

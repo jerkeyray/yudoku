@@ -37,7 +37,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(formattedBookmarks);
+    return NextResponse.json(formattedBookmarks, {
+      headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300" },
+    });
   } catch {
     // console.error("Error fetching bookmarks:", error);
     return NextResponse.json(

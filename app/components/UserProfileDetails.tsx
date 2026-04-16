@@ -26,7 +26,7 @@ export function UserProfileDetails({
             alt={session.user.name || "Profile"}
             fill
             className="object-cover"
-            unoptimized
+            sizes="40px"
           />
         </div>
       ) : (

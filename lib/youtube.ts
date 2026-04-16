@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { google } from "googleapis";
+import { youtube as youtubeClient } from "@googleapis/youtube";
 
-const youtube = google.youtube("v3");
+const youtube = youtubeClient("v3");
 
 interface PlaylistVideo {
   title: string;
