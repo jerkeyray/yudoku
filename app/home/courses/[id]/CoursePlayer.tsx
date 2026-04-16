@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import VideoPlayer from "./VideoPlayer";
+import KeyboardShortcuts from "./KeyboardShortcuts";
 
 const NotesSidebar = dynamic(
   () => import("@/components/NotesSidebar").then((mod) => ({ default: mod.NotesSidebar })),
@@ -171,6 +172,7 @@ export default function CoursePlayer({
     }
   );
   const [isChaptersOpen, setIsChaptersOpen] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [watchedVideos, setWatchedVideos] = useState<Set<string>>(
     new Set(
       course.videos
@@ -668,6 +670,85 @@ export default function CoursePlayer({
     uiTimeSeconds,
   ]);
 
+  // Keyboard shortcuts — use refs so the handler always reads fresh values
+  // without needing variables that are computed after the early return.
+  const shortcutCtx = useRef({
+    currentVideo,
+    isSingleVideoChapterCourse,
+    chapters,
+    currentChapterIndex,
+    chapterCompleteIds,
+  });
+  shortcutCtx.current = {
+    currentVideo,
+    isSingleVideoChapterCourse,
+    chapters,
+    currentChapterIndex,
+    chapterCompleteIds,
+  };
+
+  useEffect(() => {
+    // Desktop-only — skip on narrow viewports
+    const mq = window.matchMedia("(min-width: 1024px)");
+    if (!mq.matches) return;
+
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "?") {
+        e.preventDefault();
+        setShowShortcuts((prev) => !prev);
+        return;
+      }
+
+      if (e.key === "Escape") {
+        if (showShortcuts) { setShowShortcuts(false); return; }
+        if (isNotesOpen) { setIsNotesOpen(false); return; }
+        return;
+      }
+
+      const tag = (document.activeElement?.tagName ?? "").toLowerCase();
+      if (tag === "input" || tag === "textarea" || (document.activeElement as HTMLElement)?.isContentEditable) return;
+
+      const ctx = shortcutCtx.current;
+      const chapter = ctx.isSingleVideoChapterCourse && ctx.chapters.length > 0
+        ? ctx.chapters[Math.min(ctx.currentChapterIndex, ctx.chapters.length - 1)]
+        : null;
+
+      switch (e.key.toLowerCase()) {
+        case "n": e.preventDefault(); handleNextVideo(); break;
+        case "p": e.preventDefault(); handlePreviousVideo(); break;
+        case "m":
+          e.preventDefault();
+          if (ctx.isSingleVideoChapterCourse && chapter) markChapterComplete(chapter.id);
+          else handleVideoProgress(ctx.currentVideo.id);
+          break;
+        case "b": e.preventDefault(); handleBookmark(ctx.currentVideo.id); break;
+        case "e":
+          e.preventDefault();
+          setIsNotesOpen((prev) => {
+            if (!prev) { try { playerRef.current?.pauseVideo?.(); } catch {} }
+            return !prev;
+          });
+          break;
+      }
+    };
+
+    // Reclaim focus from the YouTube iframe when the user clicks anywhere
+    // outside it so keyboard shortcuts keep working.
+    const reclaim = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName !== "IFRAME") {
+        (document.activeElement as HTMLElement)?.blur?.();
+      }
+    };
+
+    document.addEventListener("keydown", handler);
+    document.addEventListener("click", reclaim, true);
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.removeEventListener("click", reclaim, true);
+    };
+  }, [showShortcuts, isNotesOpen, handleNextVideo, handlePreviousVideo, handleVideoProgress, handleBookmark, markChapterComplete]);
+
   const seekTo = useCallback((seconds: number) => {
     if (playerRef.current && typeof playerRef.current.seekTo === "function") {
       playerRef.current.seekTo(seconds, true);
@@ -878,6 +959,14 @@ export default function CoursePlayer({
           onOpenChange={setIsNotesOpen}
         />
       </div>
+
+      <p className="hidden lg:block text-[10px] text-muted-foreground mt-4">
+        Press <kbd className="px-1 py-0.5 rounded bg-muted border border-border text-[10px] font-mono">?</kbd> for keyboard shortcuts
+      </p>
+
+      {showShortcuts && (
+        <KeyboardShortcuts onClose={() => setShowShortcuts(false)} />
+      )}
     </div>
   );
 }

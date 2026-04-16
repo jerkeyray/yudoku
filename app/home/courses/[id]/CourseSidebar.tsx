@@ -207,7 +207,7 @@ export default function CourseSidebar({
                       <p
                         className={`line-clamp-2 leading-snug ${
                           isActive
-                            ? "text-foreground text-sm font-semibold"
+                            ? "text-foreground text-sm font-medium"
                             : isCompleted
                             ? "text-muted-foreground text-sm"
                             : isUpcoming

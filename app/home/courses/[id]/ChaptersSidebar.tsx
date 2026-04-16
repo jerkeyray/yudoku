@@ -191,7 +191,7 @@ export default function ChaptersSidebar({
                       className={cn(
                         "line-clamp-2 leading-snug text-sm",
                         isActive
-                          ? "text-foreground font-semibold"
+                          ? "text-foreground font-medium"
                           : isCompleted
                           ? "text-muted-foreground"
                           : "text-muted-foreground"
