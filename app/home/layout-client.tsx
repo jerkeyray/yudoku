@@ -21,9 +21,6 @@ export default function HomeLayoutClient({
 }: HomeLayoutClientProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(true);
-  const isCoursePage =
-    pathname?.includes("/courses/") && pathname.match(/\/courses\/[^\/]+$/);
-
   // Load collapsed state from local storage
   useEffect(() => {
     const storedCollapsed = localStorage.getItem("sidebarCollapsed");
@@ -45,7 +42,6 @@ export default function HomeLayoutClient({
         className={cn(
           "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[80] bg-background transition-all duration-200 ease-in-out",
           isCollapsed ? "md:w-16" : "md:w-64",
-          isCoursePage && "opacity-50"
         )}
       >
         <div
