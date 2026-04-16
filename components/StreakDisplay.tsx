@@ -121,23 +121,23 @@ export function StreakDisplay({ activities, session }: StreakDisplayProps) {
 
   return (
     <div className="grid grid-cols-2 gap-4 w-full">
-      <Card className="bg-[#0D1016] border-white/5">
+      <Card className="bg-card border-border">
         <CardContent className="p-4 flex flex-col justify-center h-full">
-          <p className="text-xs text-neutral-500 font-medium uppercase tracking-wide mb-1">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
             Last Studied
           </p>
-          <p className="text-lg font-medium text-white">{lastActiveString}</p>
+          <p className="text-lg font-medium text-foreground">{lastActiveString}</p>
         </CardContent>
       </Card>
 
-      <Card className="bg-[#0D1016] border-white/5">
+      <Card className="bg-card border-border">
         <CardContent className="p-4 flex flex-col justify-center h-full">
-          <p className="text-xs text-neutral-500 font-medium uppercase tracking-wide mb-1">
+          <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-1">
             Longest Streak
           </p>
-          <p className="text-lg font-medium text-neutral-300">
+          <p className="text-lg font-medium text-foreground">
             {longestStreak}{" "}
-            <span className="text-sm text-neutral-600 font-normal">days</span>
+            <span className="text-sm text-muted-foreground font-normal">days</span>
           </p>
         </CardContent>
       </Card>

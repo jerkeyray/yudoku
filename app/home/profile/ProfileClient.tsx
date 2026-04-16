@@ -92,7 +92,7 @@ export default function ProfileClient({
 }: ProfileClientProps) {
   if (!profileData || !session?.user) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-background text-foreground">
         <main className="container py-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -109,7 +109,7 @@ export default function ProfileClient({
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <main className="container py-12 px-4 max-w-4xl mx-auto space-y-12">
         {/* Profile Header & Identity */}
         <div className="space-y-6">
@@ -117,7 +117,7 @@ export default function ProfileClient({
             {/* Profile Image */}
             <div className="flex-shrink-0">
               {session.user.image ? (
-                <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-zinc-800 grayscale hover:grayscale-0 transition-all duration-500">
+                <div className="relative h-20 w-20 overflow-hidden rounded-full ring-2 ring-border grayscale hover:grayscale-0 transition-all duration-500">
                   <Image
                     src={session.user.image}
                     alt={session.user.name || "Profile"}
@@ -129,7 +129,7 @@ export default function ProfileClient({
                   />
                 </div>
               ) : (
-                <div className="h-32 w-32 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-500 text-4xl font-bold ring-2 ring-zinc-800">
+                <div className="h-32 w-32 rounded-full bg-muted flex items-center justify-center text-muted-foreground text-4xl font-bold ring-2 ring-border">
                   {session.user.name?.[0]?.toUpperCase() || "U"}
                 </div>
               )}
@@ -137,10 +137,10 @@ export default function ProfileClient({
 
             {/* Profile Info */}
             <div className="flex-1 min-w-0 space-y-2">
-              <h1 className="text-3xl font-bold text-white tracking-tight">
+              <h1 className="text-3xl font-bold text-foreground tracking-tight">
                 {session.user.name || "User"}
               </h1>
-              <div className="flex items-center gap-4 text-sm text-zinc-500 pt-1">
+              <div className="flex items-center gap-4 text-sm text-muted-foreground pt-1">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>
@@ -156,10 +156,10 @@ export default function ProfileClient({
         {/* Active Focus Card */}
         {profileData.activeCourse && (
           <section className="space-y-4">
-            <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
               Active Focus
             </h2>
-            <Card className="bg-zinc-900/50 border-zinc-800 hover:border-zinc-700 transition-colors group">
+            <Card className="bg-card border-border hover:border-border transition-colors group">
               <CardContent className="p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center">
                   <div className="space-y-3 flex-1">
@@ -167,11 +167,11 @@ export default function ProfileClient({
                       <Activity className="h-4 w-4" />
                       <span>In Progress</span>
                     </div>
-                    <h3 className="text-2xl font-semibold text-white group-hover:text-blue-100 transition-colors">
+                    <h3 className="text-2xl font-semibold text-foreground group-hover:text-blue-100 transition-colors">
                       {profileData.activeCourse.title}
                     </h3>
                     <div className="space-y-2 max-w-md">
-                      <div className="flex justify-between text-sm text-zinc-400">
+                      <div className="flex justify-between text-sm text-muted-foreground">
                         <span>
                           {profileData.activeCourse.progress}% Complete
                         </span>
@@ -182,7 +182,7 @@ export default function ProfileClient({
                       </div>
                       <Progress
                         value={profileData.activeCourse.progress}
-                        className="h-1.5 bg-zinc-800"
+                        className="h-1.5 bg-muted"
                       />
                     </div>
                   </div>
@@ -190,7 +190,7 @@ export default function ProfileClient({
                     href={`/home/courses/${profileData.activeCourse.id}`}
                     className="w-full sm:w-auto"
                   >
-                    <Button className="w-full sm:w-auto bg-white text-black hover:bg-zinc-200 font-medium px-8">
+                    <Button className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-8">
                       Resume Learning
                     </Button>
                   </Link>
@@ -202,44 +202,44 @@ export default function ProfileClient({
 
         {/* Stats Grid */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Metrics
           </h2>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-card border-border">
               <CardContent className="p-6">
-                <div className="text-sm text-zinc-500 mb-1">Last Studied</div>
-                <div className="text-2xl font-bold text-white">
+                <div className="text-sm text-muted-foreground mb-1">Last Studied</div>
+                <div className="text-2xl font-bold text-foreground">
                   {getLastStudiedText(profileData.stats.lastStudied)}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-card border-border">
               <CardContent className="p-6">
-                <div className="text-sm text-zinc-500 mb-1">Longest Streak</div>
-                <div className="text-2xl font-bold text-zinc-300">
+                <div className="text-sm text-muted-foreground mb-1">Longest Streak</div>
+                <div className="text-2xl font-bold text-foreground">
                   {profileData.stats.longestStreak}{" "}
-                  <span className="text-sm font-normal text-zinc-600">
+                  <span className="text-sm font-normal text-muted-foreground">
                     days
                   </span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-card border-border">
               <CardContent className="p-6">
-                <div className="text-sm text-zinc-500 mb-1">Completed</div>
-                <div className="text-2xl font-bold text-zinc-300">
+                <div className="text-sm text-muted-foreground mb-1">Completed</div>
+                <div className="text-2xl font-bold text-foreground">
                   {profileData.stats.coursesCompleted}
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-zinc-900/30 border-zinc-800/50">
+            <Card className="bg-card border-border">
               <CardContent className="p-6">
-                <div className="text-sm text-zinc-500 mb-1">Hours Watched</div>
-                <div className="text-2xl font-bold text-zinc-300">
+                <div className="text-sm text-muted-foreground mb-1">Hours Watched</div>
+                <div className="text-2xl font-bold text-foreground">
                   {Math.round(profileData.stats.totalWatchTime / 60)}
                 </div>
               </CardContent>
@@ -249,7 +249,7 @@ export default function ProfileClient({
 
         {/* Contribution Graph */}
         <section className="space-y-4">
-          <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
+          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Study Rhythm
           </h2>
           <div className="overflow-hidden py-2">
@@ -260,30 +260,30 @@ export default function ProfileClient({
         {/* Achievements / Completed Courses */}
         {profileData.completedCourses.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-sm font-medium text-zinc-500 uppercase tracking-wider">
+            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
               Milestones
             </h2>
             <div className="grid gap-4">
               {profileData.completedCourses.map((course) => (
                 <div
                   key={course.id}
-                  className="group flex items-center justify-between p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/50 hover:border-zinc-700 transition-all"
+                  className="group flex items-center justify-between p-6 rounded-lg bg-muted/30 border border-border hover:border-border transition-all"
                 >
                   <div className="flex items-center gap-4">
                     <div className="h-10 w-10 rounded-full bg-green-900/20 flex items-center justify-center border border-green-900/30">
                       <CheckCircle className="h-5 w-5 text-green-500" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-white group-hover:text-zinc-200 transition-colors">
+                      <h3 className="text-lg font-medium text-foreground group-hover:text-foreground transition-colors">
                         {course.title}
                       </h3>
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-muted-foreground">
                         Completed on{" "}
                         {format(new Date(course.completedAt), "MMM d, yyyy")}
                       </p>
                     </div>
                   </div>
-                  <div className="hidden sm:flex items-center gap-6 text-sm text-zinc-600">
+                  <div className="hidden sm:flex items-center gap-6 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <Clock className="h-4 w-4" />
                       <span>{course.totalHours}h</span>

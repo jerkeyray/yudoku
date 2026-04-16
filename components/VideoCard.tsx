@@ -86,11 +86,11 @@ export default function VideoCard({
       className={cn(
         "group relative overflow-hidden border transition-all duration-200 flex flex-col w-full cursor-pointer",
         isBookmark
-          ? "rounded-lg border-zinc-800 bg-zinc-900/50"
-          : "rounded-xl border-zinc-800 bg-zinc-900",
+          ? "rounded-lg border-border bg-card"
+          : "rounded-xl border-border bg-card",
         isStale
           ? "opacity-60 hover:opacity-100 grayscale-[0.5] hover:grayscale-0"
-          : "hover:border-zinc-700 hover:bg-zinc-800/50"
+          : "hover:border-border hover:bg-accent"
       )}
       onClick={() => {
         if (video.courseId) {
@@ -110,7 +110,7 @@ export default function VideoCard({
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-2 z-10 h-8 w-8 bg-black/40 text-zinc-200 hover:bg-black/60 hover:text-red-400 transition-colors"
+          className="absolute right-2 top-2 z-10 h-8 w-8 bg-black/40 text-foreground hover:bg-black/60 hover:text-red-400 transition-colors"
           onClick={handleRemove}
           title="Remove bookmark"
           aria-label="Remove bookmark"
@@ -136,7 +136,7 @@ export default function VideoCard({
         {isBookmark
           ? null
           : video.duration && (
-              <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-1 text-xs text-white font-medium">
+              <div className="absolute bottom-2 right-2 rounded bg-black/80 px-2 py-1 text-xs text-foreground font-medium">
                 {video.duration}
               </div>
             )}
@@ -150,7 +150,7 @@ export default function VideoCard({
         <div>
           <h3
             className={cn(
-              "mb-1 line-clamp-2 min-h-[2.5rem] text-white group-hover:text-blue-400 transition-colors duration-200",
+              "mb-1 line-clamp-2 min-h-[2.5rem] text-foreground group-hover:text-blue-400 transition-colors duration-200",
               isBookmark ? "font-medium text-sm" : "font-semibold text-base"
             )}
           >
@@ -160,7 +160,7 @@ export default function VideoCard({
             className={cn(
               "line-clamp-1 mb-2",
               isBookmark
-                ? "text-xs text-zinc-500"
+                ? "text-xs text-muted-foreground"
                 : "text-sm font-medium text-blue-400"
             )}
             title={video.courseTitle || "Unknown Course"}
@@ -172,7 +172,7 @@ export default function VideoCard({
           <div className="mt-2 pt-0 flex items-center gap-2">
             <Button
               variant="outline"
-              className="flex-1 border-zinc-800 bg-transparent text-zinc-200 hover:bg-white/5 hover:text-white h-8 text-xs font-medium"
+              className="flex-1 border-border bg-transparent text-foreground hover:bg-accent hover:text-foreground h-8 text-xs font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 if (video.courseId) {
@@ -189,8 +189,8 @@ export default function VideoCard({
             </Button>
           </div>
         ) : (
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-800">
-            <div className="flex items-center text-sm text-gray-400">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+            <div className="flex items-center text-sm text-muted-foreground">
               Bookmark
             </div>
             {onRemove && (

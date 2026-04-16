@@ -156,8 +156,8 @@ export default function CourseSidebar({
     <div className="pt-4">
       <div className="sticky top-4 flex flex-col h-fit max-h-[calc(100vh-8rem)]">
         {/* Header */}
-        <div className="px-4 pt-3 pb-3 border-b border-white/5">
-          <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">
+        <div className="px-4 pt-3 pb-3 border-b border-border">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
             Chapters
           </h3>
         </div>
@@ -180,15 +180,15 @@ export default function CourseSidebar({
                   key={video.id}
                   data-video-index={index}
                   onClick={() => handleVideoClick(index)}
-                  className={`w-full relative text-left transition-colors border-b border-white/10 ${
-                    isActive ? "bg-white/10" : "hover:bg-white/5"
+                  className={`w-full relative text-left transition-colors border-b border-border ${
+                    isActive ? "bg-accent" : "hover:bg-accent/50"
                   }`}
                   title={video.title}
                 >
                   <div className="flex items-center gap-3 px-4 py-2.5">
                     {/* Left accent bar for active lesson */}
                     {isActive && (
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-white" />
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-foreground" />
                     )}
 
                     {/* State indicator - only show check for completed, nothing for others */}
@@ -196,7 +196,7 @@ export default function CourseSidebar({
                       {isCompleted && (
                         <Check
                           className={`h-3.5 w-3.5 ${
-                            isActive ? "text-white/80" : "text-neutral-500"
+                            isActive ? "text-foreground/80" : "text-muted-foreground"
                           }`}
                         />
                       )}
@@ -207,12 +207,12 @@ export default function CourseSidebar({
                       <p
                         className={`line-clamp-2 leading-snug ${
                           isActive
-                            ? "text-white text-sm font-semibold"
+                            ? "text-foreground text-sm font-semibold"
                             : isCompleted
-                            ? "text-neutral-500 text-sm"
+                            ? "text-muted-foreground text-sm"
                             : isUpcoming
-                            ? "text-neutral-400 text-sm"
-                            : "text-neutral-500 text-sm"
+                            ? "text-muted-foreground text-sm"
+                            : "text-muted-foreground text-sm"
                         }`}
                       >
                         {cleanedTitle}

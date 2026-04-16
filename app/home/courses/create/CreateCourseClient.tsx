@@ -106,14 +106,14 @@ export default function CreateCourseClient({
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       <main className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-6">
         <div className="w-full max-w-xl space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              className="text-neutral-400 hover:text-white hover:bg-white/5 -ml-4"
+              className="text-muted-foreground hover:text-foreground hover:bg-accent -ml-4"
               asChild
             >
               <Link href="/home" className="flex items-center gap-2">
@@ -124,23 +124,23 @@ export default function CreateCourseClient({
           </div>
 
           <div className="space-y-2">
-            <h1 className="text-3xl font-medium tracking-tight text-white">
+            <h1 className="text-3xl font-medium tracking-tight text-foreground">
               Create a course
             </h1>
-            <p className="text-neutral-400 font-light text-lg">
+            <p className="text-muted-foreground font-light text-lg">
               Paste either a YouTube playlist link, or a single video link.
               Single videos are automatically split into chapters using the
               timestamps in the video description.
             </p>
           </div>
 
-          <Card className="border border-white/15 bg-[#0F0F0F] shadow-2xl">
+          <Card className="border border-border bg-card shadow-2xl">
             <CardContent className="p-8">
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="space-y-3">
                   <label
                     htmlFor="title"
-                    className="text-sm font-medium text-neutral-200"
+                    className="text-sm font-medium text-foreground"
                   >
                     Course Title
                   </label>
@@ -149,19 +149,19 @@ export default function CreateCourseClient({
                     name="title"
                     required
                     placeholder="e.g. Introduction to TypeScript"
-                    className="bg-[#0A0A0A] border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-white focus-visible:border-white h-12"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring h-12"
                   />
                 </div>
 
                 <div className="space-y-3">
                   <label
                     htmlFor="playlistUrl"
-                    className="text-sm font-medium text-neutral-200"
+                    className="text-sm font-medium text-foreground"
                   >
                     YouTube playlist or video URL
                   </label>
                   <div className="relative">
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                    <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Youtube className="h-5 w-5" />
                     </div>
                     <Input
@@ -170,19 +170,19 @@ export default function CreateCourseClient({
                       required
                       type="url"
                       placeholder="https://youtube.com/watch?v=... or ...playlist?list=..."
-                      className="pl-10 bg-[#0A0A0A] border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-white focus-visible:border-white h-12"
+                      className="pl-10 bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring h-12"
                     />
                   </div>
-                  <p className="text-xs text-neutral-500 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     Works with public and unlisted playlists. For single videos,
                     timestamps must be in the video description.
                   </p>
                 </div>
 
                 <div className="space-y-3 flex flex-col">
-                  <label className="text-sm font-normal text-neutral-400">
+                  <label className="text-sm font-normal text-muted-foreground">
                     Target Completion Date{" "}
-                    <span className="text-neutral-500 font-normal ml-1">
+                    <span className="text-muted-foreground font-normal ml-1">
                       (Optional)
                     </span>
                   </label>
@@ -190,14 +190,14 @@ export default function CreateCourseClient({
                     placeholder="MM/DD/YYYY"
                     value={dateInput}
                     onChange={handleDateInputChange}
-                    className="bg-[#0A0A0A] border-white/10 text-white placeholder:text-neutral-600 focus-visible:ring-1 focus-visible:ring-white focus-visible:border-white h-12"
+                    className="bg-background border-border text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring h-12"
                   />
                 </div>
 
                 <div className="space-y-3">
                   <Button
                     type="submit"
-                    className="w-full h-12 bg-white text-black hover:bg-neutral-200 font-medium text-base transition-all border-0"
+                    className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-medium text-base transition-all border-0"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -211,7 +211,7 @@ export default function CreateCourseClient({
                       "Create course"
                     )}
                   </Button>
-                  <p className="text-xs text-neutral-500 text-center">
+                  <p className="text-xs text-muted-foreground text-center">
                     You can change details later.
                   </p>
                 </div>

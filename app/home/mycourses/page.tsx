@@ -51,14 +51,14 @@ export default function MyCoursesPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-background text-foreground">
         <div className="p-8 md:p-12">
           <div className="max-w-6xl">
-            <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center">
-              <h2 className="mb-2 text-xl font-medium text-white">
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
+              <h2 className="mb-2 text-xl font-medium text-foreground">
                 Error loading courses
               </h2>
-              <p className="mb-4 text-zinc-400">
+              <p className="mb-4 text-muted-foreground">
                 Please try refreshing the page
               </p>
             </div>
@@ -73,13 +73,13 @@ export default function MyCoursesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="p-8 md:p-12">
         <div className="max-w-6xl">
           {sortedCourses.length > 0 && (
             <div className="mb-16 flex flex-col justify-between gap-4 md:flex-row md:items-center">
               <div>
-                <h1 className="text-xl font-medium text-zinc-400">
+                <h1 className="text-xl font-medium text-muted-foreground">
                   My Courses
                 </h1>
               </div>
@@ -88,7 +88,7 @@ export default function MyCoursesPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="border-zinc-800 text-zinc-200 hover:bg-white/5 hover:text-white"
+                  className="border-border text-foreground hover:bg-accent hover:text-foreground"
                 >
                   <Link href="/home/courses/create">
                     <PlusCircle className="mr-2 h-5 w-5" />
@@ -101,12 +101,12 @@ export default function MyCoursesPage() {
 
           {sortedCourses.length === 0 ? (
             <div className="py-20">
-              <p className="text-zinc-600 text-lg">No courses yet.</p>
+              <p className="text-muted-foreground text-lg">No courses yet.</p>
               <div className="mt-6">
                 <Button
                   asChild
                   variant="outline"
-                  className="border-zinc-800 text-zinc-200 hover:bg-white/5 hover:text-white"
+                  className="border-border text-foreground hover:bg-accent hover:text-foreground"
                 >
                   <Link href="/home/courses/create">Add your first course</Link>
                 </Button>

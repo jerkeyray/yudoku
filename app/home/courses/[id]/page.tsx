@@ -120,8 +120,8 @@ export default async function CoursePage({
     courseWithProgress.videos[0].chapters.length > 0;
 
   return (
-    <div className="min-h-screen lg:h-screen bg-black text-white lg:overflow-hidden">
-      <div className="bg-black h-full">
+    <div className="min-h-screen lg:h-screen bg-background text-foreground lg:overflow-hidden">
+      <div className="bg-background h-full">
         <main className="container h-full min-h-0 pt-16 lg:pt-6 pb-6 px-4 lg:px-6">
           {renderAsChapterCourse ? (
             <ChaptersLayout

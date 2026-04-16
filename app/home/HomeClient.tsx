@@ -203,7 +203,7 @@ export default function HomeClient({ courses }: HomeClientProps) {
 
                 <Link
                   href={`/home/courses/${nextTask.courseId}?videoId=${nextTask.videoId}`}
-                  className="group block relative overflow-hidden rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] shadow-2xl shadow-black/50 hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-500"
+                  className="group block relative overflow-hidden rounded-2xl bg-foreground/[0.04] backdrop-blur-2xl border border-border shadow-2xl shadow-black/50 hover:bg-foreground/[0.06] hover:border-border transition-all duration-500"
                 >
                   <div className="p-6 md:p-8 space-y-6">
                     {/* Course Info */}
@@ -261,7 +261,7 @@ export default function HomeClient({ courses }: HomeClientProps) {
                     </div>
 
                     {/* Action Button */}
-                    <div className="flex items-center justify-between pt-5 border-t border-white/5">
+                    <div className="flex items-center justify-between pt-5 border-t border-border">
                       <div className="flex flex-col gap-1">
                         <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                           Up next
@@ -292,10 +292,10 @@ export default function HomeClient({ courses }: HomeClientProps) {
               </div>
             ) : (
               <div className="w-full text-center py-12 border border-dashed border-border rounded-lg bg-card/40">
-                <h2 className="text-lg font-medium text-white mb-2">
+                <h2 className="text-lg font-medium text-foreground mb-2">
                   No active courses
                 </h2>
-                <p className="text-sm text-neutral-500 mb-4">
+                <p className="text-sm text-muted-foreground mb-4">
                   Start a new learning journey today.
                 </p>
                 <Button
@@ -324,7 +324,7 @@ export default function HomeClient({ courses }: HomeClientProps) {
                           <Link
                             key={video.id}
                             href={`/home/courses/${video.courseId}?videoId=${video.id}`}
-                            className="flex items-start justify-between gap-4 rounded-md px-3 py-2.5 hover:bg-white/5 transition-colors group/item"
+                            className="flex items-start justify-between gap-4 rounded-md px-3 py-2.5 hover:bg-accent transition-colors group/item"
                           >
                             <div className="flex min-w-0 flex-col">
                               <span className="text-sm font-medium text-foreground/90 group-hover/item:text-foreground transition-colors truncate">

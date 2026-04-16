@@ -23,6 +23,7 @@ import {
   Home,
   HelpCircle,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const learningRoutes = [
   {
@@ -86,8 +87,8 @@ export function DashboardSidebar({
                 className={cn(
                   "flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
                   isActive
-                    ? "text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-200 font-normal",
+                    ? "text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground font-normal",
                   isCollapsed ? "justify-center px-2" : ""
                 )}
               >
@@ -96,16 +97,16 @@ export function DashboardSidebar({
                   className={cn(
                     "absolute inset-0 rounded-lg transition-colors",
                     isActive
-                      ? "bg-white/10"
-                      : "bg-transparent group-hover:bg-white/5"
+                      ? "bg-accent"
+                      : "bg-transparent group-hover:bg-accent/50"
                   )}
                 />
                 <route.icon
                   className={cn(
                     "h-[18px] w-[18px] relative z-10 transition-colors",
                     isActive
-                      ? "text-white opacity-100"
-                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
+                      ? "text-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
                   )}
                 />
                 {!isCollapsed && (
@@ -131,8 +132,8 @@ export function DashboardSidebar({
                 className={cn(
                   "flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
                   isActive
-                    ? "text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-200 font-normal",
+                    ? "text-foreground font-medium"
+                    : "text-muted-foreground hover:text-foreground font-normal",
                   isCollapsed ? "justify-center px-2" : ""
                 )}
               >
@@ -141,16 +142,16 @@ export function DashboardSidebar({
                   className={cn(
                     "absolute inset-0 rounded-lg transition-colors",
                     isActive
-                      ? "bg-white/10"
-                      : "bg-transparent group-hover:bg-white/5"
+                      ? "bg-accent"
+                      : "bg-transparent group-hover:bg-accent/50"
                   )}
                 />
                 <route.icon
                   className={cn(
                     "h-[18px] w-[18px] relative z-10 transition-colors",
                     isActive
-                      ? "text-white opacity-100"
-                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
+                      ? "text-foreground"
+                      : "text-muted-foreground group-hover:text-foreground"
                   )}
                 />
                 {!isCollapsed && (
@@ -170,8 +171,8 @@ export function DashboardSidebar({
           className={cn(
             "mb-2 flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
             isWhyYudokuActive
-              ? "text-white font-medium"
-              : "text-neutral-400 hover:text-neutral-200 font-normal",
+              ? "text-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground font-normal",
             isCollapsed ? "justify-center px-2" : ""
           )}
         >
@@ -179,20 +180,22 @@ export function DashboardSidebar({
             className={cn(
               "absolute inset-0 rounded-lg transition-colors",
               isWhyYudokuActive
-                ? "bg-white/10"
-                : "bg-transparent group-hover:bg-white/5"
+                ? "bg-accent"
+                : "bg-transparent group-hover:bg-accent/50"
             )}
           />
           <HelpCircle
             className={cn(
               "h-[18px] w-[18px] relative z-10 transition-colors",
               isWhyYudokuActive
-                ? "text-white opacity-100"
-                : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
+                ? "text-foreground"
+                : "text-muted-foreground group-hover:text-foreground"
             )}
           />
           {!isCollapsed && <span className="relative z-10">Why Yudoku</span>}
         </Link>
+
+        <ThemeToggle isCollapsed={isCollapsed} />
 
         {/* Profile Section with Dropdown */}
         {session?.user && (
@@ -203,14 +206,14 @@ export function DashboardSidebar({
                 suppressHydrationWarning
                 variant="ghost"
                 className={cn(
-                  "flex items-center gap-x-3 text-sm px-3 py-2.5 text-neutral-400 w-full transition-colors duration-150 hover:bg-white/5 hover:text-neutral-300 h-auto relative group",
+                  "flex items-center gap-x-3 text-sm px-3 py-2.5 text-muted-foreground w-full transition-colors duration-150 hover:bg-accent/50 hover:text-foreground h-auto relative group",
                   isCollapsed
                     ? "justify-center rounded-md px-2"
                     : "rounded-md justify-start"
                 )}
               >
                 {session.user.image ? (
-                  <div className="relative h-6 w-6 rounded-full overflow-hidden ring-1 ring-white/10">
+                  <div className="relative h-6 w-6 rounded-full overflow-hidden ring-1 ring-border">
                     <Image
                       src={session.user.image}
                       alt={session.user.name || "Profile"}
@@ -220,7 +223,7 @@ export function DashboardSidebar({
                     />
                   </div>
                 ) : (
-                  <div className="h-6 w-6 rounded-full bg-neutral-800 flex items-center justify-center text-white text-xs font-medium ring-1 ring-white/10">
+                  <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-foreground text-xs font-medium ring-1 ring-border">
                     {session.user.name?.[0]?.toUpperCase() || "U"}
                   </div>
                 )}
@@ -236,10 +239,10 @@ export function DashboardSidebar({
             <DropdownMenuContent
               align={isCollapsed ? "center" : "start"}
               side="top"
-              className="w-56 mb-2 z-[90] bg-[#0A0A0A] border border-white/10 text-neutral-400"
+              className="w-56 mb-2 z-[90] bg-popover border border-border text-muted-foreground"
             >
               <DropdownMenuItem
-                className="cursor-pointer hover:bg-white/5 focus:bg-white/5 focus:text-white"
+                className="cursor-pointer hover:bg-accent focus:bg-accent focus:text-foreground"
                 onClick={() => signOut({ callbackUrl: "/" })}
               >
                 <LogOut className="mr-2 h-4 w-4" />

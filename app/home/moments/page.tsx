@@ -140,12 +140,12 @@ export default function MomentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-background text-foreground">
       <div className="p-8 md:p-12">
         <div className="max-w-6xl">
           <div className="mb-10">
-            <h1 className="text-xl font-medium text-zinc-400">Moments</h1>
-            <p className="text-sm text-zinc-600 mt-2">
+            <h1 className="text-xl font-medium text-muted-foreground">Moments</h1>
+            <p className="text-sm text-muted-foreground mt-2">
               Saved timestamps across your courses.
             </p>
           </div>
@@ -154,13 +154,13 @@ export default function MomentsPage() {
             <LoadingScreen />
           ) : grouped.length === 0 ? (
             <div className="py-20">
-              <p className="text-zinc-600 text-lg">No moments yet.</p>
+              <p className="text-muted-foreground text-lg">No moments yet.</p>
             </div>
           ) : (
             <div className="space-y-10">
               {grouped.map((course) => (
                 <section key={course.courseId}>
-                  <h2 className="text-sm font-medium text-white uppercase tracking-wider mb-4">
+                  <h2 className="text-sm font-medium text-foreground uppercase tracking-wider mb-4">
                     {course.courseTitle}
                   </h2>
 
@@ -168,10 +168,10 @@ export default function MomentsPage() {
                     {course.videos.map((video) => (
                       <div
                         key={video.videoId}
-                        className="rounded-lg border border-zinc-800 bg-zinc-900/40"
+                        className="rounded-lg border border-border bg-card"
                       >
-                        <div className="px-4 py-3 border-b border-zinc-800">
-                          <p className="text-sm text-zinc-200 truncate">
+                        <div className="px-4 py-3 border-b border-border">
+                          <p className="text-sm text-foreground truncate">
                             {video.videoTitle}
                           </p>
                         </div>
@@ -190,7 +190,7 @@ export default function MomentsPage() {
                               return (
                                 <div
                                   key={moment.id}
-                                  className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-white/5 transition-colors"
+                                  className="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-accent transition-colors"
                                 >
                                   <Link
                                     href={href}
@@ -202,8 +202,8 @@ export default function MomentsPage() {
                                     <span
                                       className={
                                         label
-                                          ? "text-sm text-zinc-200 whitespace-pre-wrap break-words leading-snug"
-                                          : "text-sm text-zinc-500"
+                                          ? "text-sm text-foreground whitespace-pre-wrap break-words leading-snug"
+                                          : "text-sm text-muted-foreground"
                                       }
                                     >
                                       {label || "Saved moment"}
@@ -212,7 +212,7 @@ export default function MomentsPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 text-zinc-500 hover:bg-transparent hover:text-red-400 hover:scale-110 transition-transform focus-visible:ring-0 focus-visible:ring-offset-0"
+                                    className="h-8 w-8 text-muted-foreground hover:bg-transparent hover:text-red-400 hover:scale-110 transition-transform focus-visible:ring-0 focus-visible:ring-offset-0"
                                     aria-label="Delete moment"
                                     title="Delete"
                                     disabled={deleteMoment.isPending}

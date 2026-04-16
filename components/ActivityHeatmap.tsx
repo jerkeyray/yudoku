@@ -78,7 +78,7 @@ export default function ActivityHeatmap({
                     height: `${cellSize}px`,
                   }}
                   className={`rounded-[1px] ${
-                    cell.active ? "bg-emerald-900/60" : "bg-zinc-900"
+                    cell.active ? "bg-emerald-900/60" : "bg-muted"
                   }`}
                 />
               );

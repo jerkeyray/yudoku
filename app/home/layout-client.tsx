@@ -39,11 +39,11 @@ export default function HomeLayoutClient({
   };
 
   return (
-    <div className="h-full relative bg-black min-h-screen">
+    <div className="h-full relative bg-background min-h-screen">
       {/* Desktop Sidebar */}
       <div
         className={cn(
-          "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[80] bg-black transition-all duration-200 ease-in-out",
+          "hidden h-full md:flex md:flex-col md:fixed md:inset-y-0 z-[80] bg-background transition-all duration-200 ease-in-out",
           isCollapsed ? "md:w-16" : "md:w-64",
           isCoursePage && "opacity-50"
         )}
@@ -61,7 +61,7 @@ export default function HomeLayoutClient({
           {!isCollapsed && (
             <Link
               href="/"
-              className="text-xl font-medium tracking-tighter text-white ml-3 hover:text-neutral-300 transition-colors duration-200"
+              className="text-xl font-medium tracking-tighter text-foreground ml-3 hover:text-muted-foreground transition-colors duration-200"
             >
               yudoku
             </Link>
@@ -78,11 +78,11 @@ export default function HomeLayoutClient({
       {/* Main Content */}
       <main
         className={cn(
-          "transition-all duration-200 ease-in-out bg-black min-h-screen",
+          "transition-all duration-200 ease-in-out bg-background min-h-screen",
           isCollapsed ? "md:pl-16" : "md:pl-64"
         )}
       >
-        <div className="h-full min-h-screen bg-black">
+        <div className="h-full min-h-screen bg-background">
           <div className="md:hidden h-14" />
           <AnimatePresence mode="wait">
             <motion.div

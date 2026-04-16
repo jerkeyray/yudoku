@@ -26,21 +26,21 @@ export function MobileNav({ session }: MobileNavProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="fixed top-4 left-4 z-50 bg-zinc-900 text-white hover:bg-zinc-800 hover:text-blue-400 border border-zinc-700"
+          className="fixed top-4 left-4 z-50 bg-background text-foreground hover:bg-accent hover:text-primary border border-border"
         >
           <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent
         side="left"
-        className="p-0 w-[280px] sm:w-[320px] bg-zinc-900 border-r border-zinc-800"
+        className="p-0 w-[280px] sm:w-[320px] bg-background border-r border-border"
       >
-        <SheetHeader className="px-4 py-3 border-b border-zinc-800">
-          <SheetTitle className="text-xl font-bold text-white">
+        <SheetHeader className="px-4 py-3 border-b border-border">
+          <SheetTitle className="text-xl font-bold text-foreground">
             yudoku
           </SheetTitle>
         </SheetHeader>
-        <div className="text-white">
+        <div className="text-foreground">
           <DashboardSidebar isCollapsed={false} session={session} />
         </div>
       </SheetContent>

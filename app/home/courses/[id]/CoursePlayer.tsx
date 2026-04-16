@@ -703,7 +703,7 @@ export default function CoursePlayer({
   return (
     <div className="space-y-4">
       {/* Lesson indicator above video */}
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-muted-foreground">
         {isSingleVideoChapterCourse
           ? `Chapter ${Math.min(currentChapterIndex + 1, chapters.length)} of ${
               chapters.length
@@ -727,10 +727,10 @@ export default function CoursePlayer({
 
       {/* Video Title Above Buttons */}
       <div className="mt-4 mb-2">
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-foreground">
           {titleInfo.primary}
         </h2>
-        <p className="text-xs text-neutral-500 mt-1.5">{course.title}</p>
+        <p className="text-xs text-muted-foreground mt-1.5">{course.title}</p>
       </div>
 
       {/* Action Buttons with hierarchy */}
@@ -751,8 +751,8 @@ export default function CoursePlayer({
                   ? isChapterCompleted
                   : isVideoCompleted
               )
-                ? "bg-white text-black hover:bg-neutral-200 border-0"
-                : "bg-white text-black hover:bg-neutral-200 border-0"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 border-0"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 border-0"
             }`}
           >
             <Check className="h-4 w-4" />
@@ -772,10 +772,10 @@ export default function CoursePlayer({
             onClick={() => handleBookmark(currentVideo.id)}
             variant="outline"
             size="icon"
-            className={`flex items-center gap-2 bg-transparent border border-white/10 hover:bg-white/5 hover:border-white/20 transition-colors duration-150 ${
+            className={`flex items-center gap-2 bg-transparent border border-border hover:bg-accent hover:border-border transition-colors duration-150 ${
               bookmarkedVideos.has(currentVideo.id)
-                ? "text-white border-white/30 bg-white/10"
-                : "text-neutral-400 hover:text-white"
+                ? "text-foreground border-border bg-accent"
+                : "text-muted-foreground hover:text-foreground"
             }`}
             title="Bookmark"
           >
@@ -795,7 +795,7 @@ export default function CoursePlayer({
             }
             variant="outline"
             size="icon"
-            className="bg-transparent border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+            className="bg-transparent border border-border text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
             title={
               isSingleVideoChapterCourse
                 ? "Previous chapter"
@@ -814,7 +814,7 @@ export default function CoursePlayer({
             }
             variant="outline"
             size="icon"
-            className="bg-transparent border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+            className="bg-transparent border border-border text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
             title={isSingleVideoChapterCourse ? "Next chapter" : "Next lesson"}
           >
             <ChevronRight className="h-4 w-4" />
@@ -824,7 +824,7 @@ export default function CoursePlayer({
             <Button
               variant="outline"
               size="icon"
-              className="lg:hidden bg-transparent border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/20 transition-colors duration-150"
+              className="lg:hidden bg-transparent border border-border text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border transition-colors duration-150"
               title="Chapters"
               aria-label="Open chapters"
               onClick={() => {
@@ -839,8 +839,8 @@ export default function CoursePlayer({
             variant="outline"
             size="icon"
             className={
-              "bg-transparent border border-white/10 text-neutral-400 hover:text-white hover:bg-white/5 hover:border-white/20 transition-colors duration-150 " +
-              (isNotesOpen ? "text-white border-white/30 bg-white/10" : "")
+              "bg-transparent border border-border text-muted-foreground hover:text-foreground hover:bg-accent hover:border-border transition-colors duration-150 " +
+              (isNotesOpen ? "text-foreground border-border bg-accent" : "")
             }
             title={isNotesOpen ? "Close notes" : "Open notes"}
             aria-label={isNotesOpen ? "Close notes" : "Open notes"}

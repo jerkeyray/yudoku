@@ -121,7 +121,7 @@ export default function ChaptersSidebar({
       <div className="pt-4 flex justify-center">
         <button
           onClick={() => setCollapsed(false)}
-          className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+          className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
           title="Show chapters"
         >
           <PanelRightOpen className="h-5 w-5" />
@@ -133,13 +133,13 @@ export default function ChaptersSidebar({
   return (
     <div className="pt-4">
       <div className="sticky top-4 flex flex-col h-fit max-h-[calc(100vh-8rem)]">
-        <div className="px-4 pt-3 pb-3 border-b border-white/5 flex items-center justify-between">
-          <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
+        <div className="px-4 pt-3 pb-3 border-b border-border flex items-center justify-between">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Chapters
           </h3>
           <button
             onClick={() => setCollapsed(true)}
-            className="p-1 rounded-md text-neutral-500 hover:text-white hover:bg-white/5 transition-colors"
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
             title="Hide chapters"
           >
             <PanelRightClose className="h-4 w-4" />
@@ -161,14 +161,14 @@ export default function ChaptersSidebar({
                 data-chapter-active={isActive ? "true" : "false"}
                 onClick={() => onClickChapter(index)}
                 className={cn(
-                  "w-full relative text-left transition-colors border-b border-white/10",
-                  isActive ? "bg-white/10" : "hover:bg-white/5"
+                  "w-full relative text-left transition-colors border-b border-border",
+                  isActive ? "bg-accent" : "hover:bg-accent/50"
                 )}
                 title={ch.title}
               >
                 <div className="flex items-start gap-3 px-4 py-2.5">
                   {isActive && (
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white" />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-foreground" />
                   )}
 
                   <div className="flex-shrink-0 pt-[2px]">
@@ -176,11 +176,11 @@ export default function ChaptersSidebar({
                       <Check
                         className={cn(
                           "h-3.5 w-3.5",
-                          isActive ? "text-white/80" : "text-neutral-500"
+                          isActive ? "text-foreground/80" : "text-muted-foreground"
                         )}
                       />
                     ) : (
-                      <span className="text-[10px] font-mono text-neutral-500">
+                      <span className="text-[10px] font-mono text-muted-foreground">
                         {formatTime(ch.startSeconds)}
                       </span>
                     )}
@@ -191,10 +191,10 @@ export default function ChaptersSidebar({
                       className={cn(
                         "line-clamp-2 leading-snug text-sm",
                         isActive
-                          ? "text-white font-semibold"
+                          ? "text-foreground font-semibold"
                           : isCompleted
-                          ? "text-neutral-500"
-                          : "text-neutral-400"
+                          ? "text-muted-foreground"
+                          : "text-muted-foreground"
                       )}
                     >
                       {ch.title}
