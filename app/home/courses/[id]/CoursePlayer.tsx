@@ -712,7 +712,7 @@ export default function CoursePlayer({
       </p>
 
       {/* Video Player Area */}
-      <div className="relative w-full overflow-hidden rounded-lg bg-black">
+      <div className="relative w-full max-w-5xl overflow-hidden rounded-lg bg-black">
         <div className="relative aspect-video">
           <StableVideoContainer
             key={currentVideo.videoId}

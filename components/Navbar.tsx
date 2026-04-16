@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from "lucide-react";
+import { Github, LogOut, Star, User } from "lucide-react";
 import { Session } from "next-auth";
 
 interface NavbarProps {
@@ -30,15 +30,26 @@ export function Navbar({ session }: NavbarProps) {
             </span>
           </Link>
         </div>
-        <div className="flex items-center gap-x-3">
+        <div className="flex items-center">
+          <Link
+            href="/why-yudoku"
+            className="text-sm font-medium text-neutral-300 hover:text-white transition-colors"
+          >
+            Why Yudoku
+          </Link>
+        </div>
+        <div className="flex items-center gap-x-5">
+          <a
+            href="https://github.com/jerkeyray/yudoku"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-all"
+          >
+            <Github className="h-5 w-5" />
+            <Star className="h-3.5 w-3.5 text-yellow-400" />
+          </a>
           {isSignedIn ? (
             <div className="flex items-center gap-x-4">
-              <div className="hidden sm:flex sm:flex-col sm:items-end">
-                <p className="text-sm font-medium text-slate-200">
-                  {session.user?.name}
-                </p>
-                <p className="text-xs text-slate-400">{session.user?.email}</p>
-              </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button

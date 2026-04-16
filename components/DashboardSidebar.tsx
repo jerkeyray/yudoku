@@ -68,7 +68,7 @@ export function DashboardSidebar({
 }: DashboardSidebarProps) {
   const pathname = usePathname();
 
-  const isWhyYudokuActive = pathname === "/home/why-yudoku";
+  const isWhyYudokuActive = pathname === "/why-yudoku";
 
   return (
     <div className="flex flex-col h-full justify-between py-6">
@@ -84,28 +84,28 @@ export function DashboardSidebar({
                 href={route.href}
                 prefetch={true}
                 className={cn(
-                  "flex items-center gap-x-3 text-sm px-3 py-2.5 transition-colors duration-150 relative group",
+                  "flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
                   isActive
                     ? "text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-300 font-normal",
+                    : "text-neutral-400 hover:text-neutral-200 font-normal",
                   isCollapsed ? "justify-center px-2" : ""
                 )}
               >
                 {/* Background for active and hover */}
                 <div
                   className={cn(
-                    "absolute inset-0 rounded-md transition-colors",
+                    "absolute inset-0 rounded-lg transition-colors",
                     isActive
-                      ? "bg-white/8"
+                      ? "bg-white/10"
                       : "bg-transparent group-hover:bg-white/5"
                   )}
                 />
                 <route.icon
                   className={cn(
-                    "h-[18px] w-[18px] relative z-10 transition-[filter,color,opacity]",
+                    "h-[18px] w-[18px] relative z-10 transition-colors",
                     isActive
                       ? "text-white opacity-100"
-                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:[filter:drop-shadow(0_0_10px_currentColor)_drop-shadow(0_0_10px_currentColor)]"
+                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
                   )}
                 />
                 {!isCollapsed && (
@@ -129,28 +129,28 @@ export function DashboardSidebar({
                 href={route.href}
                 prefetch={true}
                 className={cn(
-                  "flex items-center gap-x-3 text-sm px-3 py-2.5 transition-colors duration-150 relative group",
+                  "flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
                   isActive
                     ? "text-white font-medium"
-                    : "text-neutral-400 hover:text-neutral-300 font-normal",
+                    : "text-neutral-400 hover:text-neutral-200 font-normal",
                   isCollapsed ? "justify-center px-2" : ""
                 )}
               >
                 {/* Background for active and hover */}
                 <div
                   className={cn(
-                    "absolute inset-0 rounded-md transition-colors",
+                    "absolute inset-0 rounded-lg transition-colors",
                     isActive
-                      ? "bg-white/8"
+                      ? "bg-white/10"
                       : "bg-transparent group-hover:bg-white/5"
                   )}
                 />
                 <route.icon
                   className={cn(
-                    "h-[18px] w-[18px] relative z-10 transition-[filter,color,opacity]",
+                    "h-[18px] w-[18px] relative z-10 transition-colors",
                     isActive
                       ? "text-white opacity-100"
-                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:[filter:drop-shadow(0_0_10px_currentColor)_drop-shadow(0_0_10px_currentColor)]"
+                      : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
                   )}
                 />
                 {!isCollapsed && (
@@ -165,30 +165,30 @@ export function DashboardSidebar({
       {/* Bottom Section - Profile */}
       <div className="px-3 pt-2">
         <Link
-          href="/home/why-yudoku"
+          href="/why-yudoku"
           prefetch={true}
           className={cn(
-            "mb-2 flex items-center gap-x-3 text-sm px-3 py-2.5 transition-colors duration-150 relative group",
+            "mb-2 flex items-center gap-x-3 text-sm px-3 py-2.5 rounded-lg transition-colors duration-150 relative group",
             isWhyYudokuActive
               ? "text-white font-medium"
-              : "text-neutral-400 hover:text-neutral-300 font-normal",
+              : "text-neutral-400 hover:text-neutral-200 font-normal",
             isCollapsed ? "justify-center px-2" : ""
           )}
         >
           <div
             className={cn(
-              "absolute inset-0 rounded-md transition-colors",
+              "absolute inset-0 rounded-lg transition-colors",
               isWhyYudokuActive
-                ? "bg-white/8"
+                ? "bg-white/10"
                 : "bg-transparent group-hover:bg-white/5"
             )}
           />
           <HelpCircle
             className={cn(
-              "h-[18px] w-[18px] relative z-10 transition-[filter,color,opacity]",
+              "h-[18px] w-[18px] relative z-10 transition-colors",
               isWhyYudokuActive
                 ? "text-white opacity-100"
-                : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:[filter:drop-shadow(0_0_10px_currentColor)_drop-shadow(0_0_10px_currentColor)]"
+                : "text-neutral-400 opacity-90 group-hover:text-white group-hover:opacity-100 group-hover:opacity-100"
             )}
           />
           {!isCollapsed && <span className="relative z-10">Why Yudoku</span>}

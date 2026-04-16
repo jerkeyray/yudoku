@@ -11,6 +11,7 @@ import type {
 } from "@prisma/client";
 import CourseSidebar from "./CourseSidebar";
 import ChaptersSidebar from "./ChaptersSidebar";
+import ChaptersLayout from "./ChaptersLayout";
 
 type CourseWithProgress = Course & {
   videos: (Video & {
@@ -122,29 +123,37 @@ export default async function CoursePage({
     <div className="min-h-screen lg:h-screen bg-black text-white lg:overflow-hidden">
       <div className="bg-black h-full">
         <main className="container h-full min-h-0 pt-16 lg:pt-6 pb-6 px-4 lg:px-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:h-full min-h-0">
-            {/* Course Player - spans 8 columns */}
-            <div className="lg:col-span-8 lg:h-full min-h-0 lg:overflow-y-auto">
-              <CoursePlayer
-                course={courseWithProgress}
-                initialVideoIndex={initialVideoIndex}
-                initialTimestamp={t ? parseInt(t) : undefined}
-              />
-            </div>
-
-            {/* Sidebar - spans 4 columns */}
-            <div
-              className="lg:col-span-4 lg:h-full min-h-0 lg:overflow-y-auto"
-              data-course-video-list-panel
-            >
-              {renderAsChapterCourse ? (
+          {renderAsChapterCourse ? (
+            <ChaptersLayout
+              player={
+                <CoursePlayer
+                  course={courseWithProgress}
+                  initialVideoIndex={initialVideoIndex}
+                  initialTimestamp={t ? parseInt(t) : undefined}
+                />
+              }
+              sidebar={
                 <div className="hidden lg:block">
                   <ChaptersSidebar
                     chapters={courseWithProgress.videos[0].chapters}
                     currentChapterIndex={0}
                   />
                 </div>
-              ) : (
+              }
+            />
+          ) : (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:h-full min-h-0">
+              <div className="lg:col-span-8 lg:h-full min-h-0 lg:overflow-y-auto">
+                <CoursePlayer
+                  course={courseWithProgress}
+                  initialVideoIndex={initialVideoIndex}
+                  initialTimestamp={t ? parseInt(t) : undefined}
+                />
+              </div>
+              <div
+                className="lg:col-span-4 lg:h-full min-h-0 lg:overflow-y-auto"
+                data-course-video-list-panel
+              >
                 <CourseSidebar
                   course={courseWithProgress}
                   currentVideoIndex={initialVideoIndex}
@@ -152,9 +161,9 @@ export default async function CoursePage({
                     .filter((video) => video.progress.some((p) => p.completed))
                     .map((video) => video.id)}
                 />
-              )}
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>

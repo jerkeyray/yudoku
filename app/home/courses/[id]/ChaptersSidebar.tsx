@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, PanelRightClose, PanelRightOpen } from "lucide-react";
 
 export type ChapterForSidebar = {
   id: string;
@@ -33,6 +33,7 @@ export default function ChaptersSidebar({
   currentChapterIndex: number;
 }) {
   const [localCurrent, setLocalCurrent] = useState(currentChapterIndex);
+  const [collapsed, setCollapsed] = useState(false);
   const [completedIds, setCompletedIds] = useState<Set<string>>(() => {
     const ids = new Set<string>();
     for (const ch of chapters) {
@@ -83,9 +84,18 @@ export default function ChaptersSidebar({
       );
   }, []);
 
+  // Dispatch collapse state so the page layout can react
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("chaptersSidebarCollapse", {
+        detail: { collapsed },
+      })
+    );
+  }, [collapsed]);
+
   useEffect(() => {
     const container = listRef.current;
-    if (!container) return;
+    if (!container || collapsed) return;
     const el = container.querySelector<HTMLElement>(
       "[data-chapter-active='true']"
     );
@@ -96,7 +106,7 @@ export default function ChaptersSidebar({
     });
 
     return () => window.cancelAnimationFrame(id);
-  }, [localCurrent]);
+  }, [localCurrent, collapsed]);
 
   const onClickChapter = (index: number) => {
     window.dispatchEvent(
@@ -106,13 +116,34 @@ export default function ChaptersSidebar({
     );
   };
 
+  if (collapsed) {
+    return (
+      <div className="pt-4 flex justify-center">
+        <button
+          onClick={() => setCollapsed(false)}
+          className="p-2 rounded-lg text-neutral-400 hover:text-white hover:bg-white/5 transition-colors"
+          title="Show chapters"
+        >
+          <PanelRightOpen className="h-5 w-5" />
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-4">
       <div className="sticky top-4 flex flex-col h-fit max-h-[calc(100vh-8rem)]">
-        <div className="px-4 pt-3 pb-3 border-b border-white/5">
-          <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">
+        <div className="px-4 pt-3 pb-3 border-b border-white/5 flex items-center justify-between">
+          <h3 className="text-xs font-medium text-neutral-400 uppercase tracking-wider">
             Chapters
           </h3>
+          <button
+            onClick={() => setCollapsed(true)}
+            className="p-1 rounded-md text-neutral-500 hover:text-white hover:bg-white/5 transition-colors"
+            title="Hide chapters"
+          >
+            <PanelRightClose className="h-4 w-4" />
+          </button>
         </div>
 
         <div

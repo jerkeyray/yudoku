@@ -300,7 +300,7 @@ export default function LandingPage({ session }: LandingPageProps) {
               asChild
               className="h-auto px-2 py-1 text-sm text-neutral-500 hover:text-white hover:bg-transparent"
             >
-              <Link href="/home/why-yudoku">Why Yudoku</Link>
+              <Link href="/why-yudoku">Why Yudoku</Link>
             </Button>
 
             <Button
