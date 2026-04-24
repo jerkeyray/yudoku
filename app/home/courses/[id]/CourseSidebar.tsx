@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Course, Video, VideoProgress } from "@prisma/client";
 import { Check } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 // Helper to clean video titles for sidebar
 function cleanSidebarTitle(title: string): string {
@@ -148,6 +149,9 @@ export default function CourseSidebar({
   };
 
   const totalVideos = course.videos.length;
+  const completedCount = localWatchedVideos.size;
+  const progressPercent =
+    totalVideos > 0 ? (completedCount / totalVideos) * 100 : 0;
 
   // Show all lessons
   const visibleVideos = course.videos;
@@ -155,17 +159,23 @@ export default function CourseSidebar({
   return (
     <div className="pt-4">
       <div className="sticky top-4 flex flex-col h-fit max-h-[calc(100vh-8rem)]">
-        {/* Header */}
-        <div className="px-4 pt-3 pb-3 border-b border-border">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Chapters
-          </h3>
+        {/* Header with overall progress */}
+        <div className="px-4 pt-3 pb-3 border-b border-border space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Chapters
+            </h3>
+            <span className="text-xs text-muted-foreground">
+              {completedCount}/{totalVideos} · {Math.round(progressPercent)}%
+            </span>
+          </div>
+          <Progress value={progressPercent} className="h-1" />
         </div>
 
         {/* Lesson list */}
         <div
           ref={playlistContainerRef}
-          className="flex-1 overflow-y-auto max-h-[calc(100vh-12rem)]"
+          className="flex-1 overflow-y-auto max-h-[calc(100vh-14rem)]"
         >
           <div>
             {visibleVideos.map((video) => {

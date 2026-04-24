@@ -1,11 +1,13 @@
 "use client";
 
 const shortcuts = [
+  { key: "Space", label: "Play / Pause" },
   { key: "N", label: "Next" },
   { key: "P", label: "Previous" },
   { key: "M", label: "Mark complete" },
   { key: "B", label: "Bookmark" },
   { key: "E", label: "Toggle notes" },
+  { key: "F", label: "Fullscreen" },
   { key: "Esc", label: "Close panel" },
   { key: "?", label: "This help" },
 ];

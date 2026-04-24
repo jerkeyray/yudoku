@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Check, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 export type ChapterForSidebar = {
   id: string;
@@ -116,6 +117,11 @@ export default function ChaptersSidebar({
     );
   };
 
+  const totalLessons = chapters.length;
+  const completedCount = completedIds.size;
+  const progressPercent =
+    totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+
   if (collapsed) {
     return (
       <div className="pt-4 flex justify-center">
@@ -133,22 +139,30 @@ export default function ChaptersSidebar({
   return (
     <div className="pt-4">
       <div className="sticky top-4 flex flex-col h-fit max-h-[calc(100vh-8rem)]">
-        <div className="px-4 pt-3 pb-3 border-b border-border flex items-center justify-between">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Chapters
-          </h3>
-          <button
-            onClick={() => setCollapsed(true)}
-            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
-            title="Hide chapters"
-          >
-            <PanelRightClose className="h-4 w-4" />
-          </button>
+        <div className="px-4 pt-3 pb-3 border-b border-border space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Chapters
+            </h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {completedCount}/{totalLessons} · {Math.round(progressPercent)}%
+              </span>
+              <button
+                onClick={() => setCollapsed(true)}
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                title="Hide chapters"
+              >
+                <PanelRightClose className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <Progress value={progressPercent} className="h-1" />
         </div>
 
         <div
           ref={listRef}
-          className="flex-1 overflow-y-auto max-h-[calc(100vh-12rem)]"
+          className="flex-1 overflow-y-auto max-h-[calc(100vh-14rem)]"
         >
           {chapters.map((ch, index) => {
             const isActive = index === localCurrent;

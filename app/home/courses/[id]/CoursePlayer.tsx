@@ -61,7 +61,7 @@ const StableVideoContainer = memo(
     isReadingMode: boolean;
   }) => {
     return (
-      <div className="w-full h-full bg-black">
+      <div className="w-full h-full bg-black" data-course-player>
         <VideoPlayer
           videoId={videoId}
           initialTimestamp={startTime}
@@ -714,6 +714,16 @@ export default function CoursePlayer({
         : null;
 
       switch (e.key.toLowerCase()) {
+        case " ":
+        case "spacebar": {
+          e.preventDefault();
+          try {
+            const state = playerRef.current?.getPlayerState?.();
+            if (state === 1) playerRef.current?.pauseVideo?.();
+            else playerRef.current?.playVideo?.();
+          } catch {}
+          break;
+        }
         case "n": e.preventDefault(); handleNextVideo(); break;
         case "p": e.preventDefault(); handlePreviousVideo(); break;
         case "m":
@@ -722,6 +732,19 @@ export default function CoursePlayer({
           else handleVideoProgress(ctx.currentVideo.id);
           break;
         case "b": e.preventDefault(); handleBookmark(ctx.currentVideo.id); break;
+        case "f": {
+          e.preventDefault();
+          const iframe = document.querySelector<HTMLIFrameElement>(
+            "[data-course-player] iframe"
+          );
+          if (!iframe) break;
+          if (document.fullscreenElement) {
+            document.exitFullscreen?.();
+          } else {
+            iframe.requestFullscreen?.();
+          }
+          break;
+        }
         case "e":
           e.preventDefault();
           setIsNotesOpen((prev) => {
