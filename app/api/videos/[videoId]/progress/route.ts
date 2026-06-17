@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { format, startOfDay } from "date-fns";
 import { z } from "zod";
+import { isCourseCompleteFromCounts } from "@/lib/data/certificates";
 
 export async function POST(
   req: Request,
@@ -95,7 +96,12 @@ async function checkAndCreateCertificate(userId: string, courseId: string) {
       }),
     ]);
 
-    if (totalVideos > 0 && completedVideos === totalVideos) {
+    if (
+      isCourseCompleteFromCounts({
+        totalUnits: totalVideos,
+        completedUnits: completedVideos,
+      })
+    ) {
       await prisma.certificate.upsert({
         where: { userId_courseId: { userId, courseId } },
         update: {},

@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import VideoPlayer from "./VideoPlayer";
 import KeyboardShortcuts from "./KeyboardShortcuts";
+import { shouldSaveProgress, type ProgressSaveSnapshot } from "@/lib/progress-save";
 
 const NotesSidebar = dynamic(
   () => import("@/components/NotesSidebar").then((mod) => ({ default: mod.NotesSidebar })),
@@ -161,11 +162,7 @@ export default function CoursePlayer({
   const playerRef = useRef<YouTubePlayer | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const suppressAutoChapterUntilRef = useRef<number>(0);
-  const lastProgressSaveRef = useRef<{
-    videoId: string;
-    seconds: number;
-    savedAt: number;
-  } | null>(null);
+  const lastProgressSaveRef = useRef<ProgressSaveSnapshot>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [uiTimeSeconds, setUiTimeSeconds] = useState(0);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
@@ -524,14 +521,16 @@ export default function CoursePlayer({
       if (!Number.isFinite(time) || time <= 0) return;
 
       const seconds = Math.floor(time);
-      const previous = lastProgressSaveRef.current;
-      const shouldSave =
-        options?.force ||
-        !previous ||
-        previous.videoId !== currentVideo.id ||
-        Math.abs(seconds - previous.seconds) >= 10;
-
-      if (!shouldSave) return;
+      if (
+        !shouldSaveProgress({
+          previous: lastProgressSaveRef.current,
+          videoId: currentVideo.id,
+          seconds,
+          force: options?.force,
+        })
+      ) {
+        return;
+      }
 
       try {
         await fetch(`/api/videos/${currentVideo.id}/progress`, {

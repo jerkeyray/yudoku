@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { isCourseCompleteFromCounts } from "@/lib/data/certificates";
 
 export async function POST(
   _req: Request,
@@ -87,7 +88,14 @@ async function createCertificateIfChapterCourseCompleted(
     }),
   ]);
 
-  if (totalChapters === 0 || completedChapters < totalChapters) return;
+  if (
+    !isCourseCompleteFromCounts({
+      totalUnits: totalChapters,
+      completedUnits: completedChapters,
+    })
+  ) {
+    return;
+  }
 
   await db.certificate.upsert({
     where: { userId_courseId: { userId, courseId } },

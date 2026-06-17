@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getMissingCertificateCourseIds } from "@/lib/data/certificates";
 import { subDays, isSameDay } from "date-fns";
 
 interface UserActivity {
@@ -263,19 +264,16 @@ async function createMissingCertificatesForUser(userId: string) {
   const certifiedCourseIds = new Set(
     existingCertificates.map((certificate) => certificate.courseId)
   );
-  const missingCertificates = courses
-    .filter((course) => {
-      if (certifiedCourseIds.has(course.id)) return false;
-      const chapterCount = chapterCountByCourse.get(course.id) ?? 0;
-      const isChapterCourse = course._count.videos === 1 && chapterCount > 0;
-      const totalUnits = isChapterCourse ? chapterCount : course._count.videos;
-      const completedUnits = isChapterCourse
-        ? completedChapterCountByCourse.get(course.id) ?? 0
-        : completedVideoCountByCourse.get(course.id) ?? 0;
-
-      return totalUnits > 0 && completedUnits >= totalUnits;
-    })
-    .map((course) => ({ userId, courseId: course.id }));
+  const missingCertificates = getMissingCertificateCourseIds({
+    courses: courses.map((course) => ({
+      id: course.id,
+      totalVideos: course._count.videos,
+    })),
+    chapterCountByCourse,
+    completedVideoCountByCourse,
+    completedChapterCountByCourse,
+    certifiedCourseIds,
+  }).map((courseId) => ({ userId, courseId }));
 
   if (missingCertificates.length === 0) return;
 
