@@ -323,84 +323,77 @@ export async function getCourseDashboardData(
 
   const courseIds = courses.map((course) => course.id);
 
-  const [
-    videos,
-    chapters,
-    completedVideoProgress,
-    allVideoProgress,
-    completedChapterProgress,
-    recentProgress,
-  ] = await Promise.all([
-    prisma.video.findMany({
-      where: { courseId: { in: courseIds } },
-      select: { id: true, title: true, courseId: true, order: true },
-      orderBy: [{ courseId: "asc" }, { order: "asc" }],
-    }),
-    prisma.chapter.findMany({
-      where: { video: { courseId: { in: courseIds } } },
-      select: {
-        id: true,
-        videoId: true,
-        order: true,
-        video: { select: { courseId: true } },
-      },
-      orderBy: [{ videoId: "asc" }, { order: "asc" }],
-    }),
-    prisma.videoProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        video: { courseId: { in: courseIds } },
-      },
-      select: {
-        videoId: true,
-        updatedAt: true,
-        video: { select: { courseId: true, order: true } },
-      },
-    }),
-    prisma.videoProgress.findMany({
-      where: { userId, video: { courseId: { in: courseIds } } },
-      select: {
-        videoId: true,
-        updatedAt: true,
-        lastWatchedSeconds: true,
-        video: { select: { courseId: true } },
-      },
-    }),
-    prisma.chapterProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        chapter: { video: { courseId: { in: courseIds } } },
-      },
-      select: {
-        chapterId: true,
-        chapter: {
-          select: {
-            order: true,
-            video: { select: { courseId: true } },
-          },
+  // Production uses PgBouncer with a single Prisma connection, so keep these
+  // reads sequential to avoid P2024 connection-pool timeouts.
+  const videos = await prisma.video.findMany({
+    where: { courseId: { in: courseIds } },
+    select: { id: true, title: true, courseId: true, order: true },
+    orderBy: [{ courseId: "asc" }, { order: "asc" }],
+  });
+  const chapters = await prisma.chapter.findMany({
+    where: { video: { courseId: { in: courseIds } } },
+    select: {
+      id: true,
+      videoId: true,
+      order: true,
+      video: { select: { courseId: true } },
+    },
+    orderBy: [{ videoId: "asc" }, { order: "asc" }],
+  });
+  const completedVideoProgress = await prisma.videoProgress.findMany({
+    where: {
+      userId,
+      completed: true,
+      video: { courseId: { in: courseIds } },
+    },
+    select: {
+      videoId: true,
+      updatedAt: true,
+      video: { select: { courseId: true, order: true } },
+    },
+  });
+  const allVideoProgress = await prisma.videoProgress.findMany({
+    where: { userId, video: { courseId: { in: courseIds } } },
+    select: {
+      videoId: true,
+      updatedAt: true,
+      lastWatchedSeconds: true,
+      video: { select: { courseId: true } },
+    },
+  });
+  const completedChapterProgress = await prisma.chapterProgress.findMany({
+    where: {
+      userId,
+      completed: true,
+      chapter: { video: { courseId: { in: courseIds } } },
+    },
+    select: {
+      chapterId: true,
+      chapter: {
+        select: {
+          order: true,
+          video: { select: { courseId: true } },
         },
       },
-    }),
-    prisma.videoProgress.findMany({
-      where: { userId, video: { courseId: { in: courseIds } } },
-      select: {
-        videoId: true,
-        updatedAt: true,
-        video: {
-          select: {
-            id: true,
-            title: true,
-            courseId: true,
-            course: { select: { title: true } },
-          },
+    },
+  });
+  const recentProgress = await prisma.videoProgress.findMany({
+    where: { userId, video: { courseId: { in: courseIds } } },
+    select: {
+      videoId: true,
+      updatedAt: true,
+      video: {
+        select: {
+          id: true,
+          title: true,
+          courseId: true,
+          course: { select: { title: true } },
         },
       },
-      orderBy: { updatedAt: "desc" },
-      take: 4,
-    }),
-  ]);
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 4,
+  });
 
   return buildCourseDashboardData({
     courses,

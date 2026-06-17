@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import VideoCard from "@/components/VideoCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Bookmark } from "lucide-react";
 
 interface Video {
   id: string;
@@ -44,7 +43,7 @@ export default function BookmarksPage() {
       <div className="min-h-screen bg-background text-foreground">
         <div className="p-6 md:p-8">
           <div className="max-w-4xl mx-auto">
-            <div className="rounded-lg border border-border bg-cardp-8 text-center">
+            <div className="rounded-lg border border-border bg-card p-8 text-center">
               <h2 className="mb-2 text-xl font-medium text-foreground">
                 Error loading bookmarks
               </h2>
@@ -140,7 +139,7 @@ export default function BookmarksPage() {
           {videos.length === 0 ? (
             <div className="py-20">
               <p className="text-muted-foreground text-lg">
-                No active tasks. You&apos;re all caught up.
+                No saved bookmarks yet.
               </p>
             </div>
           ) : (

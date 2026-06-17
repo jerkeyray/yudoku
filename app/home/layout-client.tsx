@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { Session } from "next-auth";
+import { RouteWarmup } from "@/components/RouteWarmup";
 
 interface HomeLayoutClientProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ export default function HomeLayoutClient({
 
   return (
     <div className="h-full relative bg-background min-h-screen">
+      <RouteWarmup />
       {/* Desktop Sidebar */}
       <div
         className={cn(

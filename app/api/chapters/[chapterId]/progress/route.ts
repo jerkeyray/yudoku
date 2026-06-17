@@ -77,16 +77,16 @@ async function createCertificateIfChapterCourseCompleted(
   userId: string,
   courseId: string
 ) {
-  const [totalChapters, completedChapters] = await Promise.all([
-    db.chapter.count({ where: { video: { courseId } } }),
-    db.chapterProgress.count({
-      where: {
-        userId,
-        completed: true,
-        chapter: { video: { courseId } },
-      },
-    }),
-  ]);
+  const totalChapters = await db.chapter.count({
+    where: { video: { courseId } },
+  });
+  const completedChapters = await db.chapterProgress.count({
+    where: {
+      userId,
+      completed: true,
+      chapter: { video: { courseId } },
+    },
+  });
 
   if (
     !isCourseCompleteFromCounts({

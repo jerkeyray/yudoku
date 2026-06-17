@@ -45,61 +45,60 @@ export async function getProfileData(userId: string) {
 
   await createMissingCertificatesForUser(userId);
 
-  const [activities, certificates, completedProgress, recentProgress] =
-    await Promise.all([
-      prisma.userActivity.findMany({
-        where: { userId },
-        orderBy: { date: "asc" },
-      }),
-      prisma.certificate.findMany({
-        where: { userId },
+  // Production uses a one-connection Prisma pool, so these profile reads run
+  // sequentially to avoid saturating the pool on page load.
+  const activities = await prisma.userActivity.findMany({
+    where: { userId },
+    orderBy: { date: "asc" },
+  });
+  const certificates = await prisma.certificate.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      courseId: true,
+      createdAt: true,
+      course: {
         select: {
           id: true,
+          title: true,
+          _count: { select: { videos: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  const completedProgress = await prisma.videoProgress.findMany({
+    where: { userId, completed: true },
+    select: {
+      id: true,
+      userId: true,
+      videoId: true,
+      completed: true,
+      createdAt: true,
+      updatedAt: true,
+      video: {
+        select: {
+          id: true,
+          title: true,
           courseId: true,
-          createdAt: true,
-          course: {
-            select: {
-              id: true,
-              title: true,
-              _count: { select: { videos: true } },
-            },
-          },
+          durationSeconds: true,
         },
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.videoProgress.findMany({
-        where: { userId, completed: true },
+      },
+    },
+  });
+  const recentProgress = await prisma.videoProgress.findFirst({
+    where: { userId },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      updatedAt: true,
+      video: {
         select: {
-          id: true,
-          userId: true,
-          videoId: true,
-          completed: true,
-          createdAt: true,
-          updatedAt: true,
-          video: {
-            select: {
-              id: true,
-              title: true,
-              courseId: true,
-              durationSeconds: true,
-            },
-          },
+          courseId: true,
+          course: { select: { id: true, title: true } },
         },
-      }),
-      prisma.videoProgress.findFirst({
-        where: { userId },
-        orderBy: { updatedAt: "desc" },
-        select: {
-          updatedAt: true,
-          video: {
-            select: {
-              courseId: true,
-              course: { select: { id: true, title: true } },
-            },
-          },
-        },
-      }),
-    ]);
+      },
+    },
+  });
 
   const currentStreak = calculateCurrentStreak(activities);
   const longestStreak = calculateLongestStreak(activities);
@@ -111,16 +110,14 @@ export async function getProfileData(userId: string) {
   if (recentProgress) {
     lastStudied = recentProgress.updatedAt.toISOString();
     const courseId = recentProgress.video.courseId;
-    const [totalVideos, completedVideos] = await Promise.all([
-      prisma.video.count({ where: { courseId } }),
-      prisma.videoProgress.count({
-        where: {
-          userId,
-          completed: true,
-          video: { courseId },
-        },
-      }),
-    ]);
+    const totalVideos = await prisma.video.count({ where: { courseId } });
+    const completedVideos = await prisma.videoProgress.count({
+      where: {
+        userId,
+        completed: true,
+        video: { courseId },
+      },
+    });
     const progressPercentage =
       totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
 
@@ -195,44 +192,37 @@ async function createMissingCertificatesForUser(userId: string) {
   if (courses.length === 0) return;
 
   const courseIds = courses.map((course) => course.id);
-  const [
-    chapterRows,
-    completedVideoProgress,
-    completedChapterProgress,
-    existingCertificates,
-  ] = await Promise.all([
-    prisma.chapter.findMany({
-      where: { video: { courseId: { in: courseIds } } },
-      select: {
-        id: true,
-        video: { select: { courseId: true } },
-      },
-    }),
-    prisma.videoProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        video: { courseId: { in: courseIds } },
-      },
-      select: {
-        video: { select: { courseId: true } },
-      },
-    }),
-    prisma.chapterProgress.findMany({
-      where: {
-        userId,
-        completed: true,
-        chapter: { video: { courseId: { in: courseIds } } },
-      },
-      select: {
-        chapter: { select: { video: { select: { courseId: true } } } },
-      },
-    }),
-    prisma.certificate.findMany({
-      where: { userId, courseId: { in: courseIds } },
-      select: { courseId: true },
-    }),
-  ]);
+  const chapterRows = await prisma.chapter.findMany({
+    where: { video: { courseId: { in: courseIds } } },
+    select: {
+      id: true,
+      video: { select: { courseId: true } },
+    },
+  });
+  const completedVideoProgress = await prisma.videoProgress.findMany({
+    where: {
+      userId,
+      completed: true,
+      video: { courseId: { in: courseIds } },
+    },
+    select: {
+      video: { select: { courseId: true } },
+    },
+  });
+  const completedChapterProgress = await prisma.chapterProgress.findMany({
+    where: {
+      userId,
+      completed: true,
+      chapter: { video: { courseId: { in: courseIds } } },
+    },
+    select: {
+      chapter: { select: { video: { select: { courseId: true } } } },
+    },
+  });
+  const existingCertificates = await prisma.certificate.findMany({
+    where: { userId, courseId: { in: courseIds } },
+    select: { courseId: true },
+  });
 
   const chapterCountByCourse = new Map<string, number>();
   for (const chapter of chapterRows) {

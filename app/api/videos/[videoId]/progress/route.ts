@@ -89,12 +89,10 @@ export async function POST(
 
 async function checkAndCreateCertificate(userId: string, courseId: string) {
   try {
-    const [totalVideos, completedVideos] = await Promise.all([
-      prisma.video.count({ where: { courseId } }),
-      prisma.videoProgress.count({
-        where: { userId, completed: true, video: { courseId } },
-      }),
-    ]);
+    const totalVideos = await prisma.video.count({ where: { courseId } });
+    const completedVideos = await prisma.videoProgress.count({
+      where: { userId, completed: true, video: { courseId } },
+    });
 
     if (
       isCourseCompleteFromCounts({

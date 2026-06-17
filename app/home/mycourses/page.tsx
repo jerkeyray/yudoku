@@ -7,7 +7,7 @@ import { PlusCircle } from "lucide-react";
 import CourseCard, { SerializedCourse } from "@/components/CourseCard";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import LoadingScreen from "@/components/LoadingScreen";
+import { PageSkeleton } from "@/components/PageSkeleton";
 
 async function getCourses() {
   const response = await fetch("/api/courses");
@@ -69,7 +69,7 @@ export default function MyCoursesPage() {
   }
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return <PageSkeleton titleWidth="w-32" cards={6} />;
   }
 
   return (

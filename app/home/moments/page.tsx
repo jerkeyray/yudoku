@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import LoadingScreen from "@/components/LoadingScreen";
+import { PageSkeleton } from "@/components/PageSkeleton";
 
 type Moment = {
   id: string;
@@ -139,6 +139,10 @@ export default function MomentsPage() {
     toast.error("Failed to load moments");
   }
 
+  if (isLoading) {
+    return <PageSkeleton titleWidth="w-28" cards={4} />;
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="p-8 md:p-12">
@@ -150,9 +154,7 @@ export default function MomentsPage() {
             </p>
           </div>
 
-          {isLoading ? (
-            <LoadingScreen />
-          ) : grouped.length === 0 ? (
+          {grouped.length === 0 ? (
             <div className="py-20">
               <p className="text-muted-foreground text-lg">No moments yet.</p>
             </div>

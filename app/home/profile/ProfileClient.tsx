@@ -44,7 +44,7 @@ interface SerializedActivity {
   updatedAt: string;
 }
 
-interface ProfileData {
+export interface ProfileData {
   user: {
     id: string;
     name: string | null;
