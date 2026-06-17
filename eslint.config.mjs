@@ -6,6 +6,18 @@ import nextPlugin from "@next/eslint-plugin-next";
 
 export default [
   {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "dist/**",
+      "build/**",
+      "eslint.config.mjs",
+      "next.config.js",
+      "prisma.config.js",
+      "next-eslint.d.ts",
+    ],
+  },
+  {
     files: ["**/*.{ts,tsx,js,jsx}"],
     languageOptions: {
       parser,
@@ -47,15 +59,5 @@ export default [
         version: "detect", // Automatically detect the React version
       },
     },
-  },
-  {
-    ignores: [
-      "node_modules/**",
-      ".next/**",
-      "dist/**",
-      "build/**",
-      "eslint.config.mjs",
-      "next-eslint.d.ts",
-    ],
   },
 ];

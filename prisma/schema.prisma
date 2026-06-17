@@ -102,6 +102,8 @@ model Course {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   certificates Certificate[]
+
+  @@index([userId, updatedAt])
 }
 
 // Video model (individual YouTube videos)
@@ -171,6 +173,7 @@ model VideoProgress {
 
   @@unique([userId, videoId])
   @@index([userId, completed])
+  @@index([userId, updatedAt])
 }
 
 // Bookmark model (bookmarked videos)
@@ -186,6 +189,7 @@ model Bookmark {
   updatedAt DateTime @default(now()) @updatedAt  // Added default value for existing rows
 
   @@unique([userId, videoId])
+  @@index([userId, createdAt])
 }
 
 // WatchLater model (watch later videos)
@@ -243,7 +247,8 @@ model Note {
   updatedAt        DateTime @updatedAt
 
   @@index([userId, videoId])
+  @@index([userId, updatedAt])
+  @@index([userId, courseId])
   @@index([courseId])
 }
-
 

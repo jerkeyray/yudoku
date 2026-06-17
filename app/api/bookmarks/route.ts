@@ -2,25 +2,41 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { ServerTimer, timedJson } from "@/lib/performance";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const timer = new ServerTimer();
   try {
-    const session = await auth();
+    const session = await timer.time("auth", () => auth());
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const bookmarks = await prisma.bookmark.findMany({
-      where: { userId: session.user.id },
+    const { searchParams } = new URL(req.url);
+    const courseId = searchParams.get("courseId");
+
+    const bookmarks = await timer.time("bookmarks", () =>
+      prisma.bookmark.findMany({
+        where: {
+          userId: session.user.id,
+          ...(courseId ? { video: { courseId } } : {}),
+        },
       orderBy: { createdAt: "desc" },
-      include: {
+      select: {
+        timestamp: true,
+        createdAt: true,
         video: {
-          include: {
-            course: true, // Include course details
+          select: {
+            id: true,
+            title: true,
+            videoId: true,
+            courseId: true,
+            course: { select: { title: true } },
           },
         },
       },
-    });
+      })
+    );
 
     // Transform the data to match the expected VideoCard format
     const formattedBookmarks = bookmarks.map((bookmark) => {
@@ -37,8 +53,10 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(formattedBookmarks, {
-      headers: { "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300" },
+    return timedJson(formattedBookmarks, timer, {
+      headers: {
+        "Cache-Control": "private, s-maxage=60, stale-while-revalidate=300",
+      },
     });
   } catch {
     // console.error("Error fetching bookmarks:", error);

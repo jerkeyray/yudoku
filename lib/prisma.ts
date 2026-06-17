@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 
 const buildDatabaseUrl = () => {
   const rawUrl = process.env.DATABASE_URL ?? process.env.DIRECT_URL;
@@ -39,12 +39,32 @@ const prismaClientSingleton = () => {
     },
     log:
       process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
+        ? [
+            { emit: "event", level: "query" },
+            { emit: "stdout", level: "error" },
+            { emit: "stdout", level: "warn" },
+          ]
         : ["error"],
   });
 };
 
 export const prisma = globalThis.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV === "development") {
+  let queryCount = 0;
+  const prismaWithQueryEvents = prisma as PrismaClient<
+    Prisma.PrismaClientOptions,
+    "query"
+  >;
+  prismaWithQueryEvents.$on("query", (event) => {
+    queryCount += 1;
+    if (event.duration > 100) {
+      console.warn(
+        `[prisma] slow query #${queryCount} ${event.duration}ms ${event.query}`
+      );
+    }
+  });
+}
 
 if (process.env.NODE_ENV !== "production") {
   globalThis.prisma = prisma;

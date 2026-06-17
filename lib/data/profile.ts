@@ -21,69 +21,20 @@ interface VideoProgress {
     id: string;
     title: string;
     courseId: string;
+    durationSeconds: number;
   };
 }
 
-interface UserWithData {
-  id: string;
-  name: string | null;
-  email: string | null;
-  image: string | null;
-  bio: string | null;
-  createdAt: Date;
-  courses: Array<{
-    id: string;
-    title: string;
-    videos: Array<{
-      id: string;
-      title: string;
-      progress: Array<{
-        id: string;
-        completed: boolean;
-      }>;
-    }>;
-  }>;
-  activities: UserActivity[];
-  certificates: Array<{
-    id: string;
-    courseId: string;
-    createdAt: Date;
-    course: {
-      id: string;
-      title: string;
-    };
-  }>;
-  videoProgress: VideoProgress[];
-}
-
 export async function getProfileData(userId: string) {
-  // Get user data
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    include: {
-      courses: {
-        include: {
-          videos: {
-            include: {
-              progress: {
-                where: { userId: userId },
-              },
-            },
-          },
-        },
-      },
-      activities: true,
-      certificates: {
-        include: {
-          course: true,
-        },
-      },
-      videoProgress: {
-        where: { completed: true },
-        include: {
-          video: true,
-        },
-      },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      bio: true,
+      createdAt: true,
     },
   });
 
@@ -91,76 +42,90 @@ export async function getProfileData(userId: string) {
     return null;
   }
 
-  // Check for completed courses without certificates and create them
-  await createMissingCertificates(user as unknown as UserWithData);
+  await createMissingCertificatesForUser(userId);
 
-  // Re-fetch user data to get the newly created certificates
-  const updatedUser = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      certificates: {
-        include: {
-          course: true,
-        },
-      },
-      videoProgress: {
-        where: { completed: true },
-        include: {
-          video: true,
-        },
-      },
-    },
-  });
-
-  if (!updatedUser) {
-    return null;
-  }
-
-  // Calculate stats
-  const currentStreak = calculateCurrentStreak(user.activities);
-  const longestStreak = calculateLongestStreak(user.activities);
-  const coursesCompleted = updatedUser.certificates.length;
-  const totalWatchTime = calculateTotalWatchTime(updatedUser.videoProgress);
-
-  // Get active course (most recently accessed)
-  const recentProgress = await prisma.videoProgress.findFirst({
-    where: { userId: userId },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      video: {
-        include: {
+  const [activities, certificates, completedProgress, recentProgress] =
+    await Promise.all([
+      prisma.userActivity.findMany({
+        where: { userId },
+        orderBy: { date: "asc" },
+      }),
+      prisma.certificate.findMany({
+        where: { userId },
+        select: {
+          id: true,
+          courseId: true,
+          createdAt: true,
           course: {
-            include: {
-              videos: {
-                include: {
-                  progress: {
-                    where: { userId: userId },
-                  },
-                },
-              },
+            select: {
+              id: true,
+              title: true,
+              _count: { select: { videos: true } },
             },
           },
         },
-      },
-    },
-  });
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.videoProgress.findMany({
+        where: { userId, completed: true },
+        select: {
+          id: true,
+          userId: true,
+          videoId: true,
+          completed: true,
+          createdAt: true,
+          updatedAt: true,
+          video: {
+            select: {
+              id: true,
+              title: true,
+              courseId: true,
+              durationSeconds: true,
+            },
+          },
+        },
+      }),
+      prisma.videoProgress.findFirst({
+        where: { userId },
+        orderBy: { updatedAt: "desc" },
+        select: {
+          updatedAt: true,
+          video: {
+            select: {
+              courseId: true,
+              course: { select: { id: true, title: true } },
+            },
+          },
+        },
+      }),
+    ]);
 
+  const currentStreak = calculateCurrentStreak(activities);
+  const longestStreak = calculateLongestStreak(activities);
+  const coursesCompleted = certificates.length;
+  const totalWatchTime = calculateTotalWatchTime(completedProgress);
   let activeCourse = null;
   let lastStudied = null;
 
   if (recentProgress) {
     lastStudied = recentProgress.updatedAt.toISOString();
-    const course = recentProgress.video.course;
-    const totalVideos = course.videos.length;
-    const completedVideos = course.videos.filter((v) =>
-      v.progress.some((p) => p.completed)
-    ).length;
+    const courseId = recentProgress.video.courseId;
+    const [totalVideos, completedVideos] = await Promise.all([
+      prisma.video.count({ where: { courseId } }),
+      prisma.videoProgress.count({
+        where: {
+          userId,
+          completed: true,
+          video: { courseId },
+        },
+      }),
+    ]);
     const progressPercentage =
       totalVideos > 0 ? Math.round((completedVideos / totalVideos) * 100) : 0;
 
     activeCourse = {
-      id: course.id,
-      title: course.title,
+      id: recentProgress.video.course.id,
+      title: recentProgress.video.course.title,
       progress: progressPercentage,
       totalVideos,
       completedVideos,
@@ -168,35 +133,27 @@ export async function getProfileData(userId: string) {
     };
   }
 
-  // Get completed courses from certificates with additional data
-  const completedCourses = await Promise.all(
-    updatedUser.certificates.map(async (certificate) => {
-      // Get all videos for this course with their progress
-      const courseVideos = await prisma.video.findMany({
-        where: { courseId: certificate.courseId },
-        include: {
-          progress: {
-            where: {
-              userId: userId,
-              completed: true,
-            },
-          },
-        },
-      });
+  const completedSecondsByCourse = new Map<string, number>();
+  for (const progress of completedProgress) {
+    const previous = completedSecondsByCourse.get(progress.video.courseId) ?? 0;
+    completedSecondsByCourse.set(
+      progress.video.courseId,
+      previous + progress.video.durationSeconds
+    );
+  }
 
-      // Calculate total hours (assuming average video length of 15 minutes)
-      const totalVideos = courseVideos.length;
-      const totalHours = Math.round((totalVideos * 15) / 60); // 15 minutes per video
-
-      return {
-        id: certificate.course.id,
-        title: certificate.course.title,
-        completedAt: certificate.createdAt.toISOString(),
-        totalHours: totalHours,
-        totalVideos: totalVideos,
-      };
-    })
-  );
+  const completedCourses = certificates.map((certificate) => {
+    const totalSeconds =
+      completedSecondsByCourse.get(certificate.courseId) ||
+      certificate.course._count.videos * 15 * 60;
+    return {
+      id: certificate.course.id,
+      title: certificate.course.title,
+      completedAt: certificate.createdAt.toISOString(),
+      totalHours: Math.round(totalSeconds / 3600),
+      totalVideos: certificate.course._count.videos,
+    };
+  });
 
   return {
     user: {
@@ -216,49 +173,116 @@ export async function getProfileData(userId: string) {
     },
     activeCourse,
     completedCourses,
-    activities: user.activities.map((a) => ({
+    activities: activities.map((a) => ({
       ...a,
-      date: a.date, // Ensure date is string
+      date: a.date,
       createdAt: a.createdAt.toISOString(),
       updatedAt: a.updatedAt.toISOString(),
     })),
   };
 }
 
-async function createMissingCertificates(user: UserWithData) {
-  try {
-    for (const course of user.courses) {
-      const totalVideos = course.videos.length;
-      const completedVideos = course.videos.filter((video) =>
-        video.progress.some((p) => p.completed)
-      ).length;
+async function createMissingCertificatesForUser(userId: string) {
+  const courses = await prisma.course.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      _count: { select: { videos: true } },
+    },
+  });
 
-      // Check if course is completed (all videos done)
-      if (totalVideos > 0 && completedVideos === totalVideos) {
-        // Check if certificate already exists
-        const existingCertificate = await prisma.certificate.findUnique({
-          where: {
-            userId_courseId: {
-              userId: user.id,
-              courseId: course.id,
-            },
-          },
-        });
+  if (courses.length === 0) return;
 
-        // Create certificate if it doesn't exist
-        if (!existingCertificate) {
-          await prisma.certificate.create({
-            data: {
-              userId: user.id,
-              courseId: course.id,
-            },
-          });
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error creating missing certificates:", error);
+  const courseIds = courses.map((course) => course.id);
+  const [
+    chapterRows,
+    completedVideoProgress,
+    completedChapterProgress,
+    existingCertificates,
+  ] = await Promise.all([
+    prisma.chapter.findMany({
+      where: { video: { courseId: { in: courseIds } } },
+      select: {
+        id: true,
+        video: { select: { courseId: true } },
+      },
+    }),
+    prisma.videoProgress.findMany({
+      where: {
+        userId,
+        completed: true,
+        video: { courseId: { in: courseIds } },
+      },
+      select: {
+        video: { select: { courseId: true } },
+      },
+    }),
+    prisma.chapterProgress.findMany({
+      where: {
+        userId,
+        completed: true,
+        chapter: { video: { courseId: { in: courseIds } } },
+      },
+      select: {
+        chapter: { select: { video: { select: { courseId: true } } } },
+      },
+    }),
+    prisma.certificate.findMany({
+      where: { userId, courseId: { in: courseIds } },
+      select: { courseId: true },
+    }),
+  ]);
+
+  const chapterCountByCourse = new Map<string, number>();
+  for (const chapter of chapterRows) {
+    const courseId = chapter.video.courseId;
+    chapterCountByCourse.set(
+      courseId,
+      (chapterCountByCourse.get(courseId) ?? 0) + 1
+    );
   }
+
+  const completedVideoCountByCourse = new Map<string, number>();
+  for (const progress of completedVideoProgress) {
+    const courseId = progress.video.courseId;
+    completedVideoCountByCourse.set(
+      courseId,
+      (completedVideoCountByCourse.get(courseId) ?? 0) + 1
+    );
+  }
+
+  const completedChapterCountByCourse = new Map<string, number>();
+  for (const progress of completedChapterProgress) {
+    const courseId = progress.chapter.video.courseId;
+    completedChapterCountByCourse.set(
+      courseId,
+      (completedChapterCountByCourse.get(courseId) ?? 0) + 1
+    );
+  }
+
+  const certifiedCourseIds = new Set(
+    existingCertificates.map((certificate) => certificate.courseId)
+  );
+  const missingCertificates = courses
+    .filter((course) => {
+      if (certifiedCourseIds.has(course.id)) return false;
+      const chapterCount = chapterCountByCourse.get(course.id) ?? 0;
+      const isChapterCourse = course._count.videos === 1 && chapterCount > 0;
+      const totalUnits = isChapterCourse ? chapterCount : course._count.videos;
+      const completedUnits = isChapterCourse
+        ? completedChapterCountByCourse.get(course.id) ?? 0
+        : completedVideoCountByCourse.get(course.id) ?? 0;
+
+      return totalUnits > 0 && completedUnits >= totalUnits;
+    })
+    .map((course) => ({ userId, courseId: course.id }));
+
+  if (missingCertificates.length === 0) return;
+
+  await prisma.certificate.createMany({
+    data: missingCertificates,
+    skipDuplicates: true,
+  });
 }
 
 function calculateCurrentStreak(activities: UserActivity[]) {
@@ -348,8 +372,14 @@ function calculateLongestStreak(activities: UserActivity[]) {
 function calculateTotalWatchTime(videoProgress: VideoProgress[]) {
   if (!videoProgress || videoProgress.length === 0) return 0;
 
-  // Calculate total watch time based on completed videos
-  // Assuming average video length of 15 minutes (900 seconds)
-  const averageVideoLengthMinutes = 15;
-  return videoProgress.length * averageVideoLengthMinutes;
+  const totalSeconds = videoProgress.reduce(
+    (sum, progress) => sum + progress.video.durationSeconds,
+    0
+  );
+
+  if (totalSeconds > 0) {
+    return Math.round(totalSeconds / 60);
+  }
+
+  return videoProgress.length * 15;
 }

@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import HomeClient from "./HomeClient";
-import { prisma } from "@/lib/prisma";
+import { getCourseDashboardData } from "@/lib/data/course-summary";
 
 export default async function HomePage() {
   const session = await auth();
@@ -10,43 +10,7 @@ export default async function HomePage() {
     redirect("/api/auth/signin");
   }
 
-  // Fetch user's courses and activities
-  const courses = await prisma.course.findMany({
-    where: {
-      userId: session.user.id,
-    },
-    include: {
-      videos: {
-        include: {
-          progress: {
-            where: {
-              userId: session.user.id,
-            },
-          },
-        },
-        orderBy: {
-          order: "asc",
-        },
-      },
-    },
-  });
+  const dashboardData = await getCourseDashboardData(session.user.id);
 
-  // Serialize the data to match the expected types
-  const serializedCourses = courses.map((course) => ({
-    ...course,
-    deadline: course.deadline?.toISOString() || null,
-    createdAt: course.createdAt.toISOString(),
-    updatedAt: course.updatedAt.toISOString(),
-    videos: course.videos.map((video) => ({
-      ...video,
-      createdAt: video.createdAt.toISOString(),
-      updatedAt: video.updatedAt.toISOString(),
-      progress: video.progress.map((p) => ({
-        ...p,
-        updatedAt: p.updatedAt.toISOString(),
-      })),
-    })),
-  }));
-
-  return <HomeClient courses={serializedCourses} />;
+  return <HomeClient dashboardData={dashboardData} />;
 }

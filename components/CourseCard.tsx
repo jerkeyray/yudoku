@@ -16,10 +16,15 @@ export interface SerializedCourse {
   deadline: string | null;
   createdAt: string;
   updatedAt: string;
-  totalVideos: number;
-  completedVideos: number;
+  totalUnits: number;
+  completedUnits: number;
   completionPercentage: number;
   nextVideoId: string | null;
+  nextChapterId?: string | null;
+  nextVideoTitle?: string | null;
+  lastWatchedSeconds?: number | null;
+  lastActivityAt?: string | null;
+  isChapterCourse?: boolean;
 }
 
 interface CourseCardProps {
@@ -82,8 +87,8 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isPrimary }) => {
           </div>
 
           <p className="text-muted-foreground mb-4 font-light text-sm uppercase tracking-wide">
-            {course.totalVideos}{" "}
-            {course.totalVideos === 1 ? "lesson" : "lessons"}
+            {course.totalUnits}{" "}
+            {course.totalUnits === 1 ? "lesson" : "lessons"}
           </p>
 
           {/* Progress bar and percentage */}

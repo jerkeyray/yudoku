@@ -43,6 +43,9 @@ interface CoursePlayerProps {
   course: CourseWithProgress;
   initialVideoIndex?: number;
   initialTimestamp?: number;
+  requestedVideoIndex?: number;
+  onVideoIndexChange?: (videoIndex: number) => void;
+  onVideoProgressChange?: (videoId: string, completed: boolean) => void;
 }
 
 // Stable container to prevent re-renders of the video player wrapper
@@ -57,7 +60,7 @@ const StableVideoContainer = memo(
     videoId: string;
     startTime: number;
     onReady: (player: YouTubePlayer) => void;
-    onProgress: (time: number) => void;
+    onProgress: (time: number, options?: { force?: boolean }) => void;
     isReadingMode: boolean;
   }) => {
     return (
@@ -146,6 +149,9 @@ export default function CoursePlayer({
   course,
   initialVideoIndex = 0,
   initialTimestamp,
+  requestedVideoIndex,
+  onVideoIndexChange,
+  onVideoProgressChange,
 }: CoursePlayerProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -155,6 +161,11 @@ export default function CoursePlayer({
   const playerRef = useRef<YouTubePlayer | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const suppressAutoChapterUntilRef = useRef<number>(0);
+  const lastProgressSaveRef = useRef<{
+    videoId: string;
+    seconds: number;
+    savedAt: number;
+  } | null>(null);
   const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [uiTimeSeconds, setUiTimeSeconds] = useState(0);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
@@ -190,7 +201,7 @@ export default function CoursePlayer({
 
     const loadBookmarks = async () => {
       try {
-        const res = await fetch("/api/bookmarks");
+        const res = await fetch(`/api/bookmarks?courseId=${course.id}`);
         if (!res.ok) return;
 
         const data = (await res.json()) as Array<{
@@ -216,12 +227,17 @@ export default function CoursePlayer({
 
   // Sync video index changes to other components (like Sidebar)
   useEffect(() => {
+    if (onVideoIndexChange) {
+      onVideoIndexChange(currentVideoIndex);
+      return;
+    }
+
     window.dispatchEvent(
       new CustomEvent("videoIndexChange", {
         detail: { videoIndex: currentVideoIndex },
       })
     );
-  }, [currentVideoIndex]);
+  }, [currentVideoIndex, onVideoIndexChange]);
 
   const persistCurrentTime = useCallback(async (videoId: string) => {
     const player = playerRef.current;
@@ -231,16 +247,39 @@ export default function CoursePlayer({
     if (!Number.isFinite(time) || time <= 0) return;
 
     try {
+      const seconds = Math.floor(time);
       await fetch(`/api/videos/${videoId}/progress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lastWatchedSeconds: Math.floor(time) }),
+        body: JSON.stringify({ lastWatchedSeconds: seconds }),
         keepalive: true,
       });
+      lastProgressSaveRef.current = {
+        videoId,
+        seconds,
+        savedAt: Date.now(),
+      };
     } catch {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    if (
+      typeof requestedVideoIndex !== "number" ||
+      requestedVideoIndex === currentVideoIndex
+    ) {
+      return;
+    }
+    const current = course.videos[currentVideoIndex];
+    if (current) persistCurrentTime(current.id);
+    setCurrentVideoIndex(requestedVideoIndex);
+  }, [
+    course.videos,
+    currentVideoIndex,
+    persistCurrentTime,
+    requestedVideoIndex,
+  ]);
 
   // Keep the selected video in the URL so refresh lands on it.
   useEffect(() => {
@@ -267,10 +306,12 @@ export default function CoursePlayer({
       setCurrentVideoIndex(videoIndex);
     };
 
-    window.addEventListener(
-      "videoIndexChange",
-      handleVideoIndexChange as EventListener
-    );
+    if (!onVideoIndexChange) {
+      window.addEventListener(
+        "videoIndexChange",
+        handleVideoIndexChange as EventListener
+      );
+    }
 
     return () => {
       window.removeEventListener(
@@ -308,12 +349,15 @@ export default function CoursePlayer({
           throw new Error("Failed to update video progress");
         }
 
-        // Emit custom event for progress update
-        window.dispatchEvent(
-          new CustomEvent("videoProgressUpdate", {
-            detail: { videoId, completed: !isCompleted },
-          })
-        );
+        if (onVideoProgressChange) {
+          onVideoProgressChange(videoId, !isCompleted);
+        } else {
+          window.dispatchEvent(
+            new CustomEvent("videoProgressUpdate", {
+              detail: { videoId, completed: !isCompleted },
+            })
+          );
+        }
 
         toast.success(
           isCompleted
@@ -334,7 +378,7 @@ export default function CoursePlayer({
         toast.error("Failed to update video progress");
       }
     },
-    [watchedVideos]
+    [onVideoProgressChange, watchedVideos]
   );
 
   const handleBookmark = useCallback(
@@ -475,15 +519,31 @@ export default function CoursePlayer({
   }, [chapters, isSingleVideoChapterCourse]);
 
   const saveProgress = useCallback(
-    async (time: number) => {
+    async (time: number, options?: { force?: boolean }) => {
       if (!currentVideo) return;
+      if (!Number.isFinite(time) || time <= 0) return;
+
+      const seconds = Math.floor(time);
+      const previous = lastProgressSaveRef.current;
+      const shouldSave =
+        options?.force ||
+        !previous ||
+        previous.videoId !== currentVideo.id ||
+        Math.abs(seconds - previous.seconds) >= 10;
+
+      if (!shouldSave) return;
 
       try {
         await fetch(`/api/videos/${currentVideo.id}/progress`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ lastWatchedSeconds: Math.floor(time) }),
+          body: JSON.stringify({ lastWatchedSeconds: seconds }),
         });
+        lastProgressSaveRef.current = {
+          videoId: currentVideo.id,
+          seconds,
+          savedAt: Date.now(),
+        };
       } catch {
         // ignore
       }

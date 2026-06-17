@@ -5,7 +5,7 @@ interface VideoPlayerProps {
   videoId: string;
   initialTimestamp?: number;
   onReady: (player: YouTubePlayer) => void;
-  onProgress: (time: number) => void;
+  onProgress: (time: number, options?: { force?: boolean }) => void;
   isReadingMode?: boolean;
 }
 
@@ -59,7 +59,7 @@ const VideoPlayer = memo(
           progressIntervalRef.current = setInterval(() => {
             const currentTime = event.target.getCurrentTime();
             if (onProgressRef.current) onProgressRef.current(currentTime);
-          }, 5000);
+          }, 20000);
         } else {
           // Clear interval and save immediately
           if (progressIntervalRef.current) {
@@ -72,7 +72,8 @@ const VideoPlayer = memo(
             typeof event.target.getCurrentTime === "function"
           ) {
             const currentTime = event.target.getCurrentTime();
-            if (onProgressRef.current) onProgressRef.current(currentTime);
+            if (onProgressRef.current)
+              onProgressRef.current(currentTime, { force: true });
           }
         }
       },

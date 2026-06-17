@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { ServerTimer, timedJson } from "@/lib/performance";
 
 const MOMENT_MAX_EFFECTIVE_CHARS = 280;
 // Make new lines consume some of the budget so users can't add tons of empty lines.
@@ -76,8 +77,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const timer = new ServerTimer();
   try {
-    const session = await auth();
+    const session = await timer.time("auth", () => auth());
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -101,9 +103,18 @@ export async function GET(req: NextRequest) {
     if (videoId) where.videoId = videoId;
     if (courseId) where.courseId = courseId;
 
-    const notes = await prisma.note.findMany({
+    const notes = await timer.time("notes", () =>
+      prisma.note.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        userId: true,
+        courseId: true,
+        videoId: true,
+        timestampSeconds: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
         course: { select: { id: true, title: true } },
         video: { select: { id: true, title: true } },
       },
@@ -112,9 +123,10 @@ export async function GET(req: NextRequest) {
         { videoId: "asc" },
         { timestampSeconds: "asc" },
       ],
-    });
+      })
+    );
 
-    return NextResponse.json(notes);
+    return timedJson(notes, timer);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.warn("Error fetching notes:", error);

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CourseDashboardData } from "@/lib/data/course-summary";
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -20,172 +21,13 @@ function formatRelativeTime(dateString: string) {
   return `${diffDays}d ago`;
 }
 
-interface SerializedCourse {
-  id: string;
-  title: string;
-  playlistId: string;
-  userId: string;
-  deadline: string | null;
-  createdAt: string;
-  updatedAt: string;
-  videos: Array<{
-    id: string;
-    title: string;
-    videoId: string;
-    order: number;
-    createdAt: string;
-    updatedAt: string;
-    progress: Array<{
-      id: string;
-      userId: string;
-      videoId: string;
-      completed: boolean;
-      updatedAt: string;
-    }>;
-  }>;
-}
-
 interface HomeClientProps {
-  courses: SerializedCourse[];
+  dashboardData: CourseDashboardData;
 }
 
-export default function HomeClient({ courses }: HomeClientProps) {
-  // --- LOGIC: Dominant "Continue" Card ---
-  let nextTask: {
-    courseId: string;
-    courseTitle: string;
-    videoTitle: string;
-    videoId: string;
-    videoOrder: number;
-    remainingInCourse: number;
-    totalVideos: number;
-    daysRemaining: number | null;
-    isUrgent: boolean;
-  } | null = null;
-
-  // Flatten video progress to find the absolute most recent activity
-  const allProgress = courses
-    .flatMap((c) =>
-      c.videos.map((v) => ({ course: c, video: v, progress: v.progress[0] }))
-    )
-    .filter((item) => item.progress)
-    .sort(
-      (a, b) =>
-        new Date(b.progress.updatedAt).getTime() -
-        new Date(a.progress.updatedAt).getTime()
-    );
-
-  const today = new Date();
-
-  const calculateUrgency = (deadline: string | null) => {
-    if (!deadline) return { daysRemaining: null, isUrgent: false };
-    const deadlineDate = new Date(deadline);
-    const daysRemaining = Math.ceil(
-      (deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return {
-      daysRemaining,
-      isUrgent: daysRemaining <= 3 && daysRemaining >= 0,
-    };
-  };
-
-  if (allProgress.length > 0) {
-    const mostRecent = allProgress[0];
-    const course = mostRecent.course;
-
-    // Find first uncompleted video in this course
-    const uncompletedVideo = course.videos
-      .sort((a, b) => a.order - b.order)
-      .find((v) => !v.progress.some((p) => p.completed));
-
-    if (uncompletedVideo) {
-      const remaining = course.videos.filter(
-        (v) => !v.progress.some((p) => p.completed)
-      ).length;
-      const { daysRemaining, isUrgent } = calculateUrgency(course.deadline);
-
-      nextTask = {
-        courseId: course.id,
-        courseTitle: course.title,
-        videoTitle: uncompletedVideo.title,
-        videoId: uncompletedVideo.id,
-        videoOrder: uncompletedVideo.order,
-        remainingInCourse: remaining,
-        totalVideos: course.videos.length,
-        daysRemaining,
-        isUrgent,
-      };
-    } else {
-      // Fallback to next available course
-      const nextCourse = courses.find((c) =>
-        c.videos.some((v) => !v.progress.some((p) => p.completed))
-      );
-      if (nextCourse) {
-        const nextVideo = nextCourse.videos
-          .sort((a, b) => a.order - b.order)
-          .find((v) => !v.progress.some((p) => p.completed));
-        if (nextVideo) {
-          const remaining = nextCourse.videos.filter(
-            (v) => !v.progress.some((p) => p.completed)
-          ).length;
-          const { daysRemaining, isUrgent } = calculateUrgency(
-            nextCourse.deadline
-          );
-
-          nextTask = {
-            courseId: nextCourse.id,
-            courseTitle: nextCourse.title,
-            videoTitle: nextVideo.title,
-            videoId: nextVideo.id,
-            videoOrder: nextVideo.order,
-            remainingInCourse: remaining,
-            totalVideos: nextCourse.videos.length,
-            daysRemaining,
-            isUrgent,
-          };
-        }
-      }
-    }
-  } else if (courses.length > 0) {
-    // No progress yet, pick the first course
-    const course = courses[0];
-    const video = course.videos.sort((a, b) => a.order - b.order)[0];
-    if (video) {
-      const { daysRemaining, isUrgent } = calculateUrgency(course.deadline);
-      nextTask = {
-        courseId: course.id,
-        courseTitle: course.title,
-        videoTitle: video.title,
-        videoId: video.id,
-        videoOrder: video.order,
-        remainingInCourse: course.videos.length,
-        totalVideos: course.videos.length,
-        daysRemaining,
-        isUrgent,
-      };
-    }
-  }
-
-  // --- LOGIC: Recently Watched (History) ---
-  const recentlyWatchedVideos = courses
-    .flatMap((course) =>
-      course.videos
-        .filter((video) => video.progress.length > 0)
-        .map((video) => ({
-          id: video.id,
-          title: video.title,
-          videoId: video.id,
-          courseId: course.id,
-          courseTitle: course.title,
-          updatedAt: video.progress[0].updatedAt,
-        }))
-    )
-    .filter((v) => !nextTask || v.videoId !== nextTask.videoId)
-    .sort(
-      (a, b) =>
-        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-    )
-    .slice(0, 3);
+export default function HomeClient({ dashboardData }: HomeClientProps) {
+  const { courses, currentTask: nextTask } = dashboardData;
+  const recentlyWatchedVideos = dashboardData.recentActivity.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground flex flex-col">
@@ -235,10 +77,7 @@ export default function HomeClient({ courses }: HomeClientProps) {
                           </span>
                           <span className="text-muted-foreground">
                             {Math.round(
-                              ((nextTask.totalVideos -
-                                nextTask.remainingInCourse) /
-                                nextTask.totalVideos) *
-                                100
+                              nextTask.completionPercentage
                             )}
                             %
                           </span>
@@ -249,10 +88,7 @@ export default function HomeClient({ courses }: HomeClientProps) {
                             style={{
                               width: `${Math.max(
                                 5,
-                                ((nextTask.totalVideos -
-                                  nextTask.remainingInCourse) /
-                                  nextTask.totalVideos) *
-                                  100
+                                nextTask.completionPercentage
                               )}%`,
                             }}
                           />

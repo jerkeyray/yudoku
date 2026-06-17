@@ -26,6 +26,7 @@ export async function POST(
       id: true,
       video: {
         select: {
+          courseId: true,
           course: {
             select: {
               userId: true,
@@ -63,5 +64,34 @@ export async function POST(
     },
   });
 
+  await createCertificateIfChapterCourseCompleted(
+    session.user.id,
+    chapter.video.courseId
+  );
+
   return NextResponse.json({ success: true });
+}
+
+async function createCertificateIfChapterCourseCompleted(
+  userId: string,
+  courseId: string
+) {
+  const [totalChapters, completedChapters] = await Promise.all([
+    db.chapter.count({ where: { video: { courseId } } }),
+    db.chapterProgress.count({
+      where: {
+        userId,
+        completed: true,
+        chapter: { video: { courseId } },
+      },
+    }),
+  ]);
+
+  if (totalChapters === 0 || completedChapters < totalChapters) return;
+
+  await db.certificate.upsert({
+    where: { userId_courseId: { userId, courseId } },
+    update: {},
+    create: { userId, courseId },
+  });
 }

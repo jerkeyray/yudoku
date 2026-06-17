@@ -38,12 +38,14 @@ interface CourseSidebarProps {
   course: CourseWithProgress;
   currentVideoIndex: number;
   watchedVideos: string[];
+  onVideoSelect?: (videoIndex: number) => void;
 }
 
 export default function CourseSidebar({
   course,
   currentVideoIndex,
   watchedVideos,
+  onVideoSelect,
 }: CourseSidebarProps) {
   const [localCurrentVideoIndex, setLocalCurrentVideoIndex] =
     useState(currentVideoIndex);
@@ -97,10 +99,12 @@ export default function CourseSidebar({
       setLocalCurrentVideoIndex(videoIndex);
     };
 
-    window.addEventListener(
-      "videoIndexChange",
-      handleVideoIndexChange as EventListener
-    );
+    if (!onVideoSelect) {
+      window.addEventListener(
+        "videoIndexChange",
+        handleVideoIndexChange as EventListener
+      );
+    }
 
     return () => {
       window.removeEventListener(
@@ -140,6 +144,10 @@ export default function CourseSidebar({
 
   const handleVideoClick = (index: number) => {
     setLocalCurrentVideoIndex(index);
+    if (onVideoSelect) {
+      onVideoSelect(index);
+      return;
+    }
     // Emit event to update video player
     window.dispatchEvent(
       new CustomEvent("videoIndexChange", {

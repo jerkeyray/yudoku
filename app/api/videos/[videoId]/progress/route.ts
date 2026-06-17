@@ -17,14 +17,27 @@ export async function POST(
 
     const bodySchema = z.object({
       completed: z.boolean().optional(),
-      lastWatchedSeconds: z.number().optional(),
+      lastWatchedSeconds: z.number().min(0).optional(),
     });
 
     const body = await req.json();
     const { completed, lastWatchedSeconds } = bodySchema.parse(body);
 
-    // Update video progress
-    const updateData: any = {};
+    const video = await prisma.video.findFirst({
+      where: { id: videoId, course: { userId } },
+      select: { id: true, courseId: true },
+    });
+
+    if (!video) {
+      return new NextResponse("Video not found or access denied", {
+        status: 404,
+      });
+    }
+
+    const updateData: {
+      completed?: boolean;
+      lastWatchedSeconds?: number;
+    } = {};
     if (completed !== undefined) updateData.completed = completed;
     if (lastWatchedSeconds !== undefined)
       updateData.lastWatchedSeconds = Math.floor(lastWatchedSeconds);
@@ -48,26 +61,13 @@ export async function POST(
     if (completed) {
       const today = format(startOfDay(new Date()), "yyyy-MM-dd");
 
-      // Check if activity already exists for today
-      const existingActivity = await prisma.userActivity.findUnique({
-        where: {
-          userId_date: { userId, date: today },
-        },
+      await prisma.userActivity.upsert({
+        where: { userId_date: { userId, date: today } },
+        update: { completed: true },
+        create: { userId, date: today, completed: true },
       });
 
-      // Create new activity if none exists
-      if (!existingActivity) {
-        await prisma.userActivity.create({
-          data: {
-            userId,
-            date: today,
-            completed: true,
-          },
-        });
-      }
-
-      // Check if course is completed and create certificate if needed
-      await checkAndCreateCertificate(userId, videoId);
+      await checkAndCreateCertificate(userId, video.courseId);
     }
 
     return NextResponse.json(progress);
@@ -86,57 +86,21 @@ export async function POST(
   }
 }
 
-async function checkAndCreateCertificate(userId: string, videoId: string) {
+async function checkAndCreateCertificate(userId: string, courseId: string) {
   try {
-    // Get the video and its course
-    const video = await prisma.video.findUnique({
-      where: { id: videoId },
-      include: {
-        course: {
-          include: {
-            videos: {
-              include: {
-                progress: {
-                  where: { userId },
-                },
-              },
-            },
-          },
-        },
-      },
-    });
+    const [totalVideos, completedVideos] = await Promise.all([
+      prisma.video.count({ where: { courseId } }),
+      prisma.videoProgress.count({
+        where: { userId, completed: true, video: { courseId } },
+      }),
+    ]);
 
-    if (!video || !video.course) {
-      return;
-    }
-
-    const course = video.course;
-    const totalVideos = course.videos.length;
-    const completedVideos = course.videos.filter((v) =>
-      v.progress.some((p) => p.completed)
-    ).length;
-
-    // Check if all videos are completed
     if (totalVideos > 0 && completedVideos === totalVideos) {
-      // Check if certificate already exists
-      const existingCertificate = await prisma.certificate.findUnique({
-        where: {
-          userId_courseId: {
-            userId,
-            courseId: course.id,
-          },
-        },
+      await prisma.certificate.upsert({
+        where: { userId_courseId: { userId, courseId } },
+        update: {},
+        create: { userId, courseId },
       });
-
-      // Create certificate if it doesn't exist
-      if (!existingCertificate) {
-        await prisma.certificate.create({
-          data: {
-            userId,
-            courseId: course.id,
-          },
-        });
-      }
     }
   } catch (error) {
     console.error("Error checking course completion:", error);

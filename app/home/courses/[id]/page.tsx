@@ -9,9 +9,9 @@ import type {
   Video,
   VideoProgress,
 } from "@prisma/client";
-import CourseSidebar from "./CourseSidebar";
 import ChaptersSidebar from "./ChaptersSidebar";
 import ChaptersLayout from "./ChaptersLayout";
+import CourseSession from "./CourseSession";
 
 type CourseWithProgress = Course & {
   videos: (Video & {
@@ -142,27 +142,11 @@ export default async function CoursePage({
               }
             />
           ) : (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 lg:h-full min-h-0">
-              <div className="lg:col-span-8 lg:h-full min-h-0 lg:overflow-y-auto">
-                <CoursePlayer
-                  course={courseWithProgress}
-                  initialVideoIndex={initialVideoIndex}
-                  initialTimestamp={t ? parseInt(t) : undefined}
-                />
-              </div>
-              <div
-                className="lg:col-span-4 lg:h-full min-h-0 lg:overflow-y-auto"
-                data-course-video-list-panel
-              >
-                <CourseSidebar
-                  course={courseWithProgress}
-                  currentVideoIndex={initialVideoIndex}
-                  watchedVideos={courseWithProgress.videos
-                    .filter((video) => video.progress.some((p) => p.completed))
-                    .map((video) => video.id)}
-                />
-              </div>
-            </div>
+            <CourseSession
+              course={courseWithProgress}
+              initialVideoIndex={initialVideoIndex}
+              initialTimestamp={t ? parseInt(t) : undefined}
+            />
           )}
         </main>
       </div>
